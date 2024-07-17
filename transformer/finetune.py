@@ -34,3 +34,47 @@ def load_ViT_tf_model(path):
   tune_params = [{'params' : model.encoder.layers.encoder_layer_11.parameters()}, {'params':  model.heads.head.parameters()}]
 
   return (model, tune_params)
+
+def tune_model(model, param_dict, hyperparams, epochs, scheduler_step_size, scheduler_gamma):
+  """
+  Function to finetune selected model paramters
+
+  parameters
+  ----------
+  model : torch.nn.module 
+    The model to be finetunes
+
+  param_dict : list 
+    List of dictionaries of selected parameters from model sections
+
+  hyperparams : np.ndarray 
+    Model hyperparameters for learning
+
+  epochs : int
+    Number of epochs over the training data to finetune the model parameters
+  
+  scheduler_step_size : int
+    Step size for multiplicative learning rate scheduler
+
+  scheduler_gamma : int 
+    Scheduler gamma value to multiply with the learning rate each scheduler step. 
+
+  returns
+  -------
+  torch.nn.module
+    finetuned model 
+  """
+
+  lr=hyperparams[0]
+  beta_1 = hyperparams[1]
+  decay = hyperparams[2]
+  criterion = LabelSmoothingCrossEntropy()
+  criterion = criterion.to(device)
+  optimizer = optim.AdamW(param_dict, lr=lr, betas = (beta_1, 0.999), weight_decay=decay)
+  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=scheculer_step_siez, gamma=scheduler_gamma)
+
+  model = get_train_model_val(model, criterion, optimizer, exp_lr_scheduler, num_epochs=epochs)
+
+  return model
+
+
