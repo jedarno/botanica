@@ -51,7 +51,7 @@ class transformer_ensemble_avg(nn.Module):
 
     return output
 
-class transformer_ensemble_weighted(nn.module):
+class transformer_ensemble_weighted(nn.Module):
     """
     nn.module class for weighted ensemble models. 
 
@@ -90,7 +90,6 @@ class transformer_ensemble_weighted(nn.module):
 
         if not np.issubdtype(weights.dtype, np.number):
             raise ValueError("weights should be numeric")
-        
         print("New model influence weights: {}".format(weights))
         self.weights = weights
 
