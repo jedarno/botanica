@@ -1,8 +1,11 @@
 """"
 Functions related to combineing or altering model acrchitectures
 """
+import numpy as np
 import torch
 import torch.nn as nn
+
+from tqdm import tqdm
 
 class transformer_ensemble_avg(nn.Module):
   """
@@ -47,8 +50,6 @@ class transformer_ensemble_avg(nn.Module):
       base_out = self.models[i](x)
       output = output + self.sftmx(base_out)
 
-    output = self.sftmx(output)
-
     return output
 
 class transformer_ensemble_weighted(nn.Module):
@@ -69,29 +70,25 @@ class transformer_ensemble_weighted(nn.Module):
         self.models = models
         self.sftmx = nn.Softmax(dim=1)
         if weights:
-            if len(weights = len(models)):
                 self.weights = weights
-            else:
-                raise ValueError("weights and models lists need to be the same length")
 
     @property
     def weights(self):
-        print("Getting influence weights")
-        return self.weights
+        return self._weights
 
     @weights.setter
     def weights(self, weights):
 
-        if len(weights) != len(models):
+        if len(weights) != len(self.models):
             raise ValueError("List of weights needs to be the same length as the list of models")
 
-        if dtype(weights) == list:
+        if type(weights) == list:
             weights = np.array(weights)
 
         if not np.issubdtype(weights.dtype, np.number):
             raise ValueError("weights should be numeric")
         print("New model influence weights: {}".format(weights))
-        self.weights = weights
+        self._weights = weights
 
     def forward(self, x):
         first_out = self.models[0](x)
@@ -100,8 +97,6 @@ class transformer_ensemble_weighted(nn.Module):
         for i in range(1, len(self.models)):
             base_out = self.models[i](x)
             output = output + self.weights[i] * self.sftmx(base_out)
-
-        output = self.sftmx(output)
 
         return output
 
