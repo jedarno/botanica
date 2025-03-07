@@ -100,4 +100,26 @@ class transformer_ensemble_weighted(nn.Module):
 
         return output
 
+class VitWithAtt(nn.module):
+
+  def __init__(self, vit_model, attention_mechanism, n_classes):
+    super(VitWithAtt, self).__init__()
+    self.conv_projection = vit_model.conv_proj
+    self.encoder = vit_model.encoder
+    self.attention_mechanism = attention_mechanism
+
+    self.classifier = nn.Sequential(
+      nn.Linear(n_inputs, 512),
+      nn.ReLU(),
+      nn.Dropout(0.3),
+      nn.Linear(512, n_classes)
+      )
+
+  def forward(self, x):
+    x = self.conv_projection(x)
+    x = self.encoder(x)
+    x = self.attention_mechanism(x)
+    x = self.classifier(x)
+    return x
+
 
