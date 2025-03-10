@@ -104,9 +104,14 @@ class VitWithAtt(nn.Module):
 
   def __init__(self, vit_model, attention_mechanism, n_classes):
     super(VitWithAtt, self).__init__()
+    self.vit_model = vit_model
+    self.class_token = vit_model.class_token
     self.conv_projection = vit_model.conv_proj
     self.encoder = vit_model.encoder
     self.attention_mechanism = attention_mechanism
+    self.patch_size = vit_model.patch_size
+    self.image_size = vit_model.image_size
+    self.hidden_dim = vit_model.hidden_dim
     n_inputs = vit_model.heads.head.in_features
 
     self.classifier = nn.Sequential(
@@ -128,7 +133,7 @@ class VitWithAtt(nn.Module):
     n_w = w // p
 
     # (n, c, h, w) -> (n, hidden_dim, n_h, n_w)
-    x = self.conv_proj(x)
+    x = self.conv_projection(x)
     # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
     x = x.reshape(n, self.hidden_dim, n_h * n_w)
 
@@ -141,10 +146,15 @@ class VitWithAtt(nn.Module):
     return x
 
   def forward(self, x):
-    x = self.conv_projection(x)
+    x = self._process_input(x)
+    n = x.shape[0]
+    # Expand the class token to the full batch
+    batch_class_token = self.class_token.expand(n, -1, -1)
+    x = torch.cat([batch_class_token, x], dim=1)
     x = self.encoder(x)
     x = self.attention_mechanism(x)
+    # Classifier "token" as used by standard language architectures
+    x = x[:, 0]
     x = self.classifier(x)
     return x
-
 
