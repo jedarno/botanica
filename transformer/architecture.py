@@ -100,13 +100,14 @@ class transformer_ensemble_weighted(nn.Module):
 
         return output
 
-class VitWithAtt(nn.module):
+class VitWithAtt(nn.Module):
 
   def __init__(self, vit_model, attention_mechanism, n_classes):
     super(VitWithAtt, self).__init__()
     self.conv_projection = vit_model.conv_proj
     self.encoder = vit_model.encoder
     self.attention_mechanism = attention_mechanism
+    n_inputs = vit_model.heads.head.in_features
 
     self.classifier = nn.Sequential(
       nn.Linear(n_inputs, 512),
@@ -114,6 +115,30 @@ class VitWithAtt(nn.module):
       nn.Dropout(0.3),
       nn.Linear(512, n_classes)
       )
+
+  def _process_input(self, x: torch.Tensor) -> torch.Tensor:
+    """
+    From torch implementation of VisionTransformer class: https://pytorch.org/vision/0.20/_modules/torchvision/models/vision_transformer.html#vit_b_16
+    """
+    n, c, h, w = x.shape
+    p = self.patch_size
+    torch._assert(h == self.image_size, f"Wrong image height! Expected {self.image_size} but got {h}!")
+    torch._assert(w == self.image_size, f"Wrong image width! Expected {self.image_size} but got {w}!")
+    n_h = h // p
+    n_w = w // p
+
+    # (n, c, h, w) -> (n, hidden_dim, n_h, n_w)
+    x = self.conv_proj(x)
+    # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
+    x = x.reshape(n, self.hidden_dim, n_h * n_w)
+
+    # (n, hidden_dim, (n_h * n_w)) -> (n, (n_h * n_w), hidden_dim)
+    # The self attention layer expects inputs in the format (N, S, E)
+    # where S is the source sequence length, N is the batch size, E is the
+    # embedding dimension
+    x = x.permute(0, 2, 1)
+
+    return x
 
   def forward(self, x):
     x = self.conv_projection(x)
