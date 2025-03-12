@@ -112,10 +112,9 @@ class VitWithAtt(nn.Module):
     self.patch_size = vit_model.patch_size
     self.image_size = vit_model.image_size
     self.hidden_dim = vit_model.hidden_dim
-    n_inputs = vit_model.heads.head.in_features
 
     self.classifier = nn.Sequential(
-      nn.Linear(n_inputs, 512),
+      nn.Linear(768, 512),
       nn.ReLU(),
       nn.Dropout(0.3),
       nn.Linear(512, n_classes)
