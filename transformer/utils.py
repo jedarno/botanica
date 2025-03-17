@@ -1,7 +1,10 @@
 """
 Useful functions for training transformers
 """
+import copy
+import time
 import timm
+import torch
 
 from torchvision import transforms as T
 
