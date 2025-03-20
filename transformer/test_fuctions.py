@@ -41,7 +41,7 @@ def topk_accuracy(output, target, topk):
 
     return list_topk_accs  # list of topk accuracies for entire batch [topk1, topk2, ... etc]
 
-def run_topk_test(model, testlaoder):
+def run_topk_test(model, testlaoder, criterion, device):
   """
   Evaluate topk accuracy and cross entropy for a model over a test data set given as a Pytorch DataLoader object
 
