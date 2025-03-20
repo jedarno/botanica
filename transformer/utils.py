@@ -30,7 +30,7 @@ def get_transforms(*, data):
       T.Normalize(timm.data.IMAGENET_DEFAULT_MEAN, timm.data.IMAGENET_DEFAULT_STD), # imagenet means
     ])
 
-def get_train_model(model, criterion, optimizer, scheduler, device, num_epochs):
+def get_train_model(model, criterion, optimizer, scheduler, trainloader, valloader, device, num_epochs):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
