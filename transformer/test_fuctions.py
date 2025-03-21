@@ -1,5 +1,5 @@
 import torch
-from tdqm import tdqm
+from tqdm import tqdm
 
 
 def topk_accuracy(output, target, topk):
