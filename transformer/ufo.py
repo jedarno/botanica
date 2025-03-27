@@ -69,3 +69,28 @@ class UFOAttention(nn.Module):
 
         
         return out
+
+class UFO_Encoder_block(nn.module):
+"""
+A block that implements a transformer block taht uses UFO attention with a convolutional layer. Should be implementable
+as a ViT encoder block, using multihead UFO attention instead of multihead self attention. 
+"""
+
+    def __init__(self, hidden_layers, d_k, d_v, num_heads, n_classes,  dropout=None, model='a'):
+        """
+        In the constructor I want to:
+        (1) Call constructor of superclass
+        (2) Call instance of UFO_Att
+        (3) Three model set ups to be used:
+            (3a) attention on fmap(inc cls tokens)
+            (3b) Q represents cls tokens
+            (3c) attention applied after seperating class tokens (class attention)
+        """
+        self.UFO_att = UFOAttention(hidden_layers, d_k, d_v, num_heads, dropout=None)
+        self.same_conv = nn.conv2d((197, hidden_layers), (197, hidden_layers), kernel_size=(3,3), stride=(3,3))  
+        self.mlp = nn.Linear()
+        #(3a)
+        if model = 'a':
+            self.classifier = nn.Sequential()
+
+
