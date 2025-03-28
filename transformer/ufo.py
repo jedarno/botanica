@@ -70,7 +70,7 @@ class UFOAttention(nn.Module):
         
         return out
 
-class UFO_Encoder_block(nn.module):
+class UFO_Class_Head(nn.module):
 """
 A block that implements a transformer block taht uses UFO attention with a convolutional layer. Should be implementable
 as a ViT encoder block, using multihead UFO attention instead of multihead self attention. 
@@ -88,9 +88,23 @@ as a ViT encoder block, using multihead UFO attention instead of multihead self 
         """
         self.UFO_att = UFOAttention(hidden_layers, d_k, d_v, num_heads, dropout=None)
         self.same_conv = nn.conv2d((197, hidden_layers), (197, hidden_layers), kernel_size=(3,3), stride=(3,3))  
-        self.mlp = nn.Linear()
-        #(3a)
+        self.mlp = nn.Sequential(
+            nn.Linear(in_features=768, out_features=3072, bias=True),
+            nn.GELU(approximate='none'),
+            nn.Linear(in_features=3072, out_features=768, bias=True)
+                )
+        #(3a) This should be in forward and not use Sequential
+        """
         if model = 'a':
-            self.classifier = nn.Sequential()
-
+            self.ufo_encoder = nn.Sequential(
+                nn.LayerNorm((768,), elementwise_affine = True)
+                self.UFO_att
+                self.LayerNorm((768,), elementwise_affine = True)
+                self.same_conv,
+                self.LayerNorm((768,), elementwise_affine = True)
+                self.mlp
+                    )
+        """
+    def forward(x):
+        return self.classifier(x)
 
