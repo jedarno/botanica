@@ -167,18 +167,12 @@ class Vit_Att_head(nn.Module):
     self.vit_model = vit_model
     self.class_token = vit_model.class_token
     self.conv_projection = vit_model.conv_proj
+    #TODO: self.encoder should just be the encoder layers, LN layer is used elsewhere
     self.encoder = vit_model.encoder
     self.attention_head = attention_head
     self.patch_size = vit_model.patch_size
     self.image_size = vit_model.image_size
     self.hidden_dim = vit_model.hidden_dim
-
-    self.classifier = nn.Sequential(
-      nn.Linear(768, 512),
-      nn.ReLU(),
-      nn.Dropout(0.3),
-      nn.Linear(512, n_classes)
-      )
 
   def _process_input(self, x: torch.Tensor) -> torch.Tensor:
     """

@@ -70,11 +70,11 @@ class UFOAttention(nn.Module):
         
         return out
 
-class UFO_Class_Head(nn.module):
-"""
-A block that implements a transformer block taht uses UFO attention with a convolutional layer. Should be implementable
-as a ViT encoder block, using multihead UFO attention instead of multihead self attention. 
-"""
+class UfoClassHead(nn.Module):
+    """
+    A block that implements a transformer block taht uses UFO attention with a convolutional layer. Should be implementable
+    as a ViT encoder block, using multihead UFO attention instead of multihead self attention. 
+    """
 
     def __init__(self, hidden_layers, d_k, d_v, num_heads, n_classes,  dropout=None, model='a'):
         """
@@ -86,13 +86,24 @@ as a ViT encoder block, using multihead UFO attention instead of multihead self 
             (3b) Q represents cls tokens
             (3c) attention applied after seperating class tokens (class attention)
         """
-        self.UFO_att = UFOAttention(hidden_layers, d_k, d_v, num_heads, dropout=None)
-        self.same_conv = nn.conv2d((197, hidden_layers), (197, hidden_layers), kernel_size=(3,3), stride=(3,3))  
+        super(UfoClassHead, self).__init__()
+        self.UFO_att = UFOAttention(hidden_layers, d_k, d_v, num_heads, dropout=0.1)
+        self.same_conv = nn.Conv2d((197, hidden_layers), (197, hidden_layers), kernel_size=(3,3), stride=(3,3))  
         self.mlp = nn.Sequential(
             nn.Linear(in_features=768, out_features=3072, bias=True),
             nn.GELU(approximate='none'),
             nn.Linear(in_features=3072, out_features=768, bias=True)
                 )
+
+        #Encoder Block Layer Norms 
+        self.ln1 = nn.LayerNorm((768,), elementwise_affine = True)
+        self.ln2 = nn.LayerNorm((768,), elementwise_affine = True)
+        self.ln3 = nn.LayerNorm((768,), elementwise_affine = True)
+
+        #Head layer Norm
+        self.ln = nn.LayerNorm((768,), eps=1e-06, elementwise_affine=True)
+        self.linear_out = nn.Linear(in_features=768, out_features=n_classes, bias=True)
+
         #(3a) This should be in forward and not use Sequential
         """
         if model = 'a':
@@ -106,5 +117,22 @@ as a ViT encoder block, using multihead UFO attention instead of multihead self 
                     )
         """
     def forward(x):
-        return self.classifier(x)
+
+        #UFO_Encoder_block
+        x = self.ln1(x)
+        x = self.UFO_att(x)
+        x = self.ln2(x)
+        x = self.same_conv(x)
+        x = self.ln3(x)
+        x = self.mlp(x)
+        #Normalising at end of encoder
+        x = self.ln(x)
+        batch_class_token = self.class_token.expand(n, -1, -1)#cls tokens for current batch
+        x = torch.cat([batch_class_token, x], dim=1)#Just class tokens
+        x = self.linear_out(x)
+
+        return x
+
+
+
 
