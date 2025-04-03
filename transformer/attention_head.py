@@ -148,7 +148,7 @@ class UfoClassHead(nn.Module):
                 self.mlp
                     )
         """
-    def forward(x):
+    def forward(self, x):
 
         #UFO_Encoder_block
         x = self.ln1(x)
