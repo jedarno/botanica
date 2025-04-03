@@ -174,6 +174,9 @@ class VitAttHead(nn.Module):
     self.image_size = vit_model.image_size
     self.hidden_dim = vit_model.hidden_dim
 
+    self.ln = nn.LayerNorm((768,), eps=1e-06, elementwise_affine=True)
+    self.linear_out = nn.Linear(in_features=768, out_features=n_classes, bias=True)
+
   def _process_input(self, x: torch.Tensor) -> torch.Tensor:
     """
     From torch implementation of VisionTransformer class: https://pytorch.org/vision/0.20/_modules/torchvision/models/vision_transformer.html#vit_b_16
