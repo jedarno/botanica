@@ -152,7 +152,7 @@ class UfoClassHead(nn.Module):
 
         #UFO_Encoder_block
         x = self.ln1(x)
-        x = self.UFO_att(x)
+        x = self.UFO_att(x, x, x)
         x = self.ln2(x)
         x = self.mlp(x)
         #Normalising at end of encoder
