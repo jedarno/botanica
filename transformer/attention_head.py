@@ -104,6 +104,7 @@ class UFOAttention(nn.Module):
 
 class UfoClassHead(nn.Module):
     """
+    !!! NO CONV for now !!!
     A block that implements a transformer block taht uses UFO attention with a convolutional layer. Should be implementable
     as a ViT encoder block, using multihead UFO attention instead of multihead self attention. 
     """
@@ -120,8 +121,7 @@ class UfoClassHead(nn.Module):
         """
         super(UfoClassHead, self).__init__()
         self.UFO_att = UFOAttention(hidden_layers, d_k, d_v, num_heads, dropout=0.1)
-        #self.same_conv = nn.Conv2d((197, hidden_layers), (197, hidden_layers), kernel_size=(3,3), stride=(3,3))  
-        self.conv1d = nn.Conv1d()
+
         self.mlp = nn.Sequential(
             nn.Linear(in_features=768, out_features=3072, bias=True),
             nn.GELU(approximate='none'),
@@ -131,7 +131,6 @@ class UfoClassHead(nn.Module):
         #Encoder Block Layer Norms 
         self.ln1 = nn.LayerNorm((768,), elementwise_affine = True)
         self.ln2 = nn.LayerNorm((768,), elementwise_affine = True)
-        self.ln3 = nn.LayerNorm((768,), elementwise_affine = True)
 
         #Head layer Norm
         self.ln = nn.LayerNorm((768,), eps=1e-06, elementwise_affine=True)
@@ -155,8 +154,6 @@ class UfoClassHead(nn.Module):
         x = self.ln1(x)
         x = self.UFO_att(x)
         x = self.ln2(x)
-        x = self.same_conv(x)
-        x = self.ln3(x)
         x = self.mlp(x)
         #Normalising at end of encoder
         x = self.ln(x)
@@ -165,7 +162,5 @@ class UfoClassHead(nn.Module):
         x = self.linear_out(x)
 
         return x
-
-
 
 

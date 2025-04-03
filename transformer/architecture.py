@@ -160,10 +160,10 @@ class VitWithAtt(nn.Module):
     return x
 
 
-class Vit_Att_head(nn.Module):
+class VitAttHead(nn.Module):
 
   def __init__(self, vit_model, attention_head, n_classes):
-    super(VitWithAtt, self).__init__()
+    super(VitAttHead, self).__init__()
     self.vit_model = vit_model
     self.class_token = vit_model.class_token
     self.conv_projection = vit_model.conv_proj
