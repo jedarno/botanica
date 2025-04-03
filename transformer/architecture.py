@@ -206,6 +206,12 @@ class VitAttHead(nn.Module):
     x = torch.cat([batch_class_token, x], dim=1)
     x = self.encoder(x)
     x = self.attention_head(x)
+    #Normalising at end of encoder
+    x = self.ln(x)
+    batch_class_token = self.class_token.expand(n, -1, -1)#cls tokens for current batch
+    x = torch.cat([batch_class_token, x], dim=1)#Just class tokens
+    x = self.linear_out(x)
+    #TODO: class_token and final linera layer to class dim.
     return x
 
 
