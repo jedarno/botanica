@@ -131,6 +131,9 @@ class UfoClassHead(nn.Module):
         #Encoder Block Layer Norms 
         self.ln1 = nn.LayerNorm((768,), elementwise_affine = True)
         self.ln2 = nn.LayerNorm((768,), elementwise_affine = True)
+        #final norm and linear layer
+        self.ln = nn.LayerNorm((768,), eps=1e-06, elementwise_affine=True)
+        self.linear_out = nn.Linear(in_features=768, out_features=n_classes, bias=True)
 
         #(3a) This should be in forward and not use Sequential
         """
