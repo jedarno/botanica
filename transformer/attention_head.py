@@ -151,6 +151,10 @@ class UfoClassHead(nn.Module):
         x = self.UFO_att(x, x, x)
         x = self.ln2(x)
         x = self.mlp(x)
+        #Normalising at end of encoder
+        x = self.ln(x)
+        x = x[:, 0]
+        x = self.linear_out(x)
         return x
 
 
