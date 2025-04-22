@@ -182,3 +182,33 @@ def train_model_loss(model, criterion, optimizer, scheduler, trainloader, trains
     model.load_state_dict(best_model_wts)
     return epoch_loss
 
+def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, device, num_epochs):
+  """
+  params is list of parameters to optimise
+  params[0] = Learning rate of optimiser
+  params[1] = gamma of schedular
+  """
+
+  model = models.vit_b_16(weights = models.ViT_B_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
+
+  for param in model.parameters():
+    param.requires_grad = False
+
+  n_inputs = model.heads.head.in_features
+  model.heads.head = nn.Sequential(
+    nn.Linear(n_inputs, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, len(classes))
+  )
+  model = model.to(device)
+
+  criterion = LabelSmoothingCrossEntropy()
+  criterion = criterion.to(device)
+  optimizer = optim.AdamW(model.heads.head.parameters(), lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
+  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
+
+  model = get_train_model_val(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
+
+  return model
+
