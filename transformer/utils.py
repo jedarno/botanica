@@ -6,6 +6,7 @@ import time
 import timm
 import torch
 
+from torchvision import datasets, models
 from torchvision import transforms as T
 
 def get_transforms(*, data):
