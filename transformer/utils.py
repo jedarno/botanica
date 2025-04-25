@@ -5,6 +5,7 @@ import copy
 import time
 import timm
 import torch
+import torch.optim as optim
 import torch.nn as nn
 
 from timm.loss import LabelSmoothingCrossEntropy
