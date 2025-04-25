@@ -117,7 +117,6 @@ def train_model_loss(model, criterion, optimizer, scheduler, trainloader, trains
     """
     since = time.time()
 
-    classes = trainset.classes
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
@@ -192,6 +191,7 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
   params[1] = gamma of schedular
   """
 
+  classes = trainset.classes
   model = models.vit_b_16(weights = models.ViT_B_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
 
   for param in model.parameters():
