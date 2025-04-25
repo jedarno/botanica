@@ -102,7 +102,7 @@ def get_train_model(model, criterion, optimizer, scheduler, trainloader, trainse
     model.load_state_dict(best_model_wts)
     return model
 
-def train_model_loss(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, classes, device, num_epochs=1):
+def train_model_loss(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1):
     """
 
     Args:
@@ -117,6 +117,7 @@ def train_model_loss(model, criterion, optimizer, scheduler, trainloader, trains
     """
     since = time.time()
 
+    classes = trainset.classes
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
