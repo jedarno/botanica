@@ -244,7 +244,7 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
   optimizer = optim.AdamW(model.head.parameters(), lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
   exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
 
-  model = get_train_model_val(model, criterion, optimizer, exp_lr_scheduler, num_epochs)
+  model = get_train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs)
 
   return model
 
