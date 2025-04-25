@@ -5,6 +5,7 @@ import copy
 import time
 import timm
 import torch
+import torch.nn as nn
 
 from torchvision import datasets, models
 from torchvision import transforms as T
