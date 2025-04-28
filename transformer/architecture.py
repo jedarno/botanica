@@ -9,6 +9,9 @@ from torchvision import models
 from torchinfo import summary
 from tqdm import tqdm
 
+class IllegalArgumentError(ValueError):
+    pass
+
 class transformer_ensemble_avg(nn.Module):
   """
   Class to combine architectures to produce a mean average of model outputs.
@@ -104,7 +107,7 @@ class transformer_ensemble_weighted(nn.Module):
 
 class VitWithAtt(nn.Module):
 
-  def __init__(self, vit_model, attention_mechanism, n_classes):
+  def __init__(self, vit_model, attention_mechanism, n_classes, att_input_type="one tensor"):
     super(VitWithAtt, self).__init__()
     self.vit_model = vit_model
     self.class_token = vit_model.class_token
@@ -115,12 +118,22 @@ class VitWithAtt(nn.Module):
     self.image_size = vit_model.image_size
     self.hidden_dim = vit_model.hidden_dim
 
+    if att_input_type == "one tensor":
+      self.att_input_type = att_input_type
+
+    elif att_input_type == "three tensors":
+      self.att_input_type = att_input_type
+
+    else: raise IllegalArgumentError("att_input type not recognised.")
+
     self.classifier = nn.Sequential(
       nn.Linear(768, 512),
       nn.ReLU(),
       nn.Dropout(0.3),
       nn.Linear(512, n_classes)
       )
+
+    
 
   def _process_input(self, x: torch.Tensor) -> torch.Tensor:
     """
@@ -153,7 +166,15 @@ class VitWithAtt(nn.Module):
     batch_class_token = self.class_token.expand(n, -1, -1)
     x = torch.cat([batch_class_token, x], dim=1)
     x = self.encoder(x)
-    x = self.attention_mechanism(x)
+
+    if self.att_input_type == "one tensor":
+      x = self.attention_mechanism(x)
+
+    elif self.att_input_type == "three tensors":
+      x = self.attention_mechanism(x,x,x) #Self attention can take three inputs, not used in this circumstance
+
+    else: raise IllegalArgumentError("att_input type not recognised.")
+      
     # Classifier "token" as used by standard language architectures
     x = x[:, 0]
     x = self.classifier(x)
@@ -178,7 +199,7 @@ class VitAttHead(nn.Module):
     """
     From torch implementation of VisionTransformer class: https://pytorch.org/vision/0.20/_modules/torchvision/models/vision_transformer.html#vit_b_16
     """
-    n, c, h, w = x.shape
+
     p = self.patch_size
     torch._assert(h == self.image_size, f"Wrong image height! Expected {self.image_size} but got {h}!")
     torch._assert(w == self.image_size, f"Wrong image width! Expected {self.image_size} but got {w}!")
