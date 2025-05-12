@@ -133,8 +133,6 @@ class VitWithAtt(nn.Module):
       nn.Linear(512, n_classes)
       )
 
-    
-
   def _process_input(self, x: torch.Tensor) -> torch.Tensor:
     """
     From torch implementation of VisionTransformer class: https://pytorch.org/vision/0.20/_modules/torchvision/models/vision_transformer.html#vit_b_16
@@ -227,6 +225,105 @@ class VitAttHead(nn.Module):
     x = torch.cat([batch_class_token, x], dim=1)
     x = self.encoder(x)
     x = self.attention_head(x)
+    return x
+
+class VitEarlyAtt(nn.Module):
+
+  def __init__(self, vit_model, local_att, n_classes, att_input_type = "one tensor"):
+    """
+    Initialise components:
+    vit encoder
+    vit class token
+    attention mechanism
+    classification_head
+    """
+    super(VitEarlyAtt, self).__init__()
+    self.vit_model = vit_model
+    self.class_token = self.vit_model.class_token
+    self.conv_projection = self.vit_model.conv_proj
+    self.conv_projection = self.vit_model.conv_proj
+    self.encoder = self.vit_model.encoder
+    self.patch_size = self.vit_model.patch_size
+    self.image_size = self.vit_model.image_size
+    self.hidden_dim = self.vit_model.hidden_dim
+    
+    self.local_att = local_att
+
+    if att_input_type == "one tensor":
+      self.att_input_type = att_input_type
+
+    elif att_input_type == "three tensors":
+      self.att_input_type = att_input_type
+
+    else: raise IllegalArgumentError("att_input type not recognised.")
+
+    self.classifier = nn.Sequential(
+      nn.Linear(768, 512),
+      nn.ReLU(),
+      nn.Dropout(0.3),
+      nn.Linear(512, n_classes)
+      )
+    
+  def _process_input(self, x: torch.Tensor) -> torch.Tensor:
+    """
+    From torch implementation of VisionTransformer class: https://pytorch.org/vision/0.20/_modules/torchvision/models/vision_transformer.html#vit_b_16
+    """
+
+    n, c, h, w = x.shape
+    p = self.patch_size
+    torch._assert(h == self.image_size, f"Wrong image height! Expected {self.image_size} but got {h}!")
+    torch._assert(w == self.image_size, f"Wrong image width! Expected {self.image_size} but got {w}!")
+    n_h = h // p
+    n_w = w // p
+
+    # (n, c, h, w) -> (n, hidden_dim, n_h, n_w)
+    x = self.conv_projection(x)
+    # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
+    x = x.reshape(n, self.hidden_dim, n_h * n_w)
+
+    # (n, hidden_dim, (n_h * n_w)) -> (n, (n_h * n_w), hidden_dim)
+    # The self attention layer expects inputs in the format (N, S, E)
+    # where S is the source sequence length, N is the batch size, E is the
+    # embedding dimension
+    x = x.permute(0, 2, 1)
+
+    return x
+
+  def forward(self, x):
+    """
+    Forward pass
+    1. Process input 
+    1.5 convolutional projection
+    2. Local attention 
+    3. Add cls tokens
+    4. Pass to ViT Encoder
+    5. Pass to classifier
+    """
+    #convolutional projection and get batch size
+    x = self._process_input(x)
+    n = x.shape[0]
+    print(x.shape)
+
+    #Local attention
+    if self.att_input_type == "one tensor":
+      x = self.local_att(x)
+    elif self.att_input_type == "three tensors":
+      x = self.local_att(x, x, x)
+
+    print(x.shape)
+
+    #Add cls tokens
+    batch_class_token = self.class_token.expand(n, -1, -1)
+    x = torch.cat([batch_class_token, x], dim=1)
+    print(x.shape)
+    #ViT Encoder 
+    x = self.encoder(x)
+    print(x.shape)
+    #Classifier
+    # Classifier "token" as used by standard language architectures
+    x = x[:, 0]
+    x = self.classifier(x)
+    print(x.shape)
     return x
 
 
