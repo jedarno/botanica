@@ -321,4 +321,16 @@ class VitEarlyAtt(nn.Module):
     x = self.classifier(x)
     return x
 
+class cnn_vit(nn.Module):
+  """
+  input -> CNN -> (Resize to conv proj) -> ViT_encoder -> class head
+  """
+
+  def __init__(self, cnn_model, vit_model, head):
+    super(cnn_vit, self).__init__()
+    self.cnn_model = cnn_model
+    self.vit_model = vit_model
+    self.head = head
+        
+
 
