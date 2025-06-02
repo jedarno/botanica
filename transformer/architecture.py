@@ -326,7 +326,7 @@ class cnn_vit(nn.Module):
   input -> CNN -> (Resize to conv proj) -> ViT_encoder -> class head
   """
 
-  def __init__(self, cnn, vit_model):
+  def __init__(self, cnn, vit_model, n_classes):
     super(cnn_vit, self).__init__()
     self.cnn = cnn
     self.vit_model = vit_model
