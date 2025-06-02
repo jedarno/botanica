@@ -326,11 +326,42 @@ class cnn_vit(nn.Module):
   input -> CNN -> (Resize to conv proj) -> ViT_encoder -> class head
   """
 
-  def __init__(self, cnn_model, vit_model, head):
+  def __init__(self, cnn, vit_model, head):
     super(cnn_vit, self).__init__()
-    self.cnn_model = cnn_model
+    self.cnn = cnn
     self.vit_model = vit_model
     self.head = head
+    self.encoder = self.vit_model.encoder
+    self.patch_size = self.vit_model.patch_size
+    self.image_size = self.vit_model.image_size
+    self.hidden_dim = self.vit_model.hidden_dim
         
+    self.classifier = nn.Sequential(
+      nn.Linear(768, 512),
+      nn.ReLU(),
+      nn.Dropout(0.3),
+      nn.Linear(512, n_classes)
+      )
 
+  def _reshape_and_permute(self, x: torch.Tensor) -> torch.Tensor:
+    n, hidden_dim, n_h, n_w = x.shape
+    # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
+    x = x.reshape(n, self.hidden_dim, n_h * n_w)
 
+    # (n, hidden_dim, (n_h * n_w)) -> (n, (n_h * n_w), hidden_dim)
+    # The self attention layer expects inputs in the format (N, S, E)
+    # where S is the source sequence length, N is the batch size, E is the
+    # embedding dimension
+    x = x.permute(0, 2, 1)
+    return x
+
+  def forward(self, x: torch.Tensor) -> Torch.Tensor
+    # CNN encoder
+    x = self.cnn(x)
+    # Patching
+    x = _self._reshape_and_permute(x)
+    # ViTEncoder
+    x = self.encoder(x)
+    # Head
+    x = self.head(x)
+    return x
