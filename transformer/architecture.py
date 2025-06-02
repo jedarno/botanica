@@ -326,7 +326,7 @@ class cnn_vit(nn.Module):
   input -> CNN -> (Resize to conv proj) -> ViT_encoder -> class head
   """
 
-  def __init__(self, cnn, vit_model, head):
+  def __init__(self, cnn, vit_model):
     super(cnn_vit, self).__init__()
     self.cnn = cnn
     self.vit_model = vit_model
@@ -355,13 +355,18 @@ class cnn_vit(nn.Module):
     x = x.permute(0, 2, 1)
     return x
 
-  def forward(self, x: torch.Tensor) -> Torch.Tensor
+  def forward(self, x: torch.Tensor) -> Torch.Tensor:
     # CNN encoder
     x = self.cnn(x)
     # Patching
     x = _self._reshape_and_permute(x)
     # ViTEncoder
+    batch_class_token = self.class_token.expand(n, -1, -1)
+    x = torch.cat([batch_class_token, x], dim=1)
     x = self.encoder(x)
     # Head
-    x = self.head(x)
+    x = x[:, 0]
+    x = self.classifier(x)
     return x
+
+
