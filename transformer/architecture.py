@@ -357,6 +357,7 @@ class cnn_vit(nn.Module):
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
     # CNN encoder
+    n = x.shape[0]
     x = self.cnn(x)
     # Patching
     x = self._reshape_and_permute(x)
