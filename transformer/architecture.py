@@ -360,7 +360,9 @@ class cnn_vit(nn.Module):
     n = x.shape[0]
     x = self.cnn(x)
     # Patching
+    print(x.shape)
     x = self._reshape_and_permute(x)
+    print(x.shape)
     # ViTEncoder
     batch_class_token = self.class_token.expand(n, -1, -1)
     x = torch.cat([batch_class_token, x], dim=1)
