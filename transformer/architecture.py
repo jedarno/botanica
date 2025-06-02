@@ -358,7 +358,7 @@ class cnn_vit(nn.Module):
     # CNN encoder
     x = self.cnn(x)
     # Patching
-    x = _self._reshape_and_permute(x)
+    x = self._reshape_and_permute(x)
     # ViTEncoder
     batch_class_token = self.class_token.expand(n, -1, -1)
     x = torch.cat([batch_class_token, x], dim=1)
