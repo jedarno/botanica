@@ -330,6 +330,7 @@ class cnn_vit(nn.Module):
     super(cnn_vit, self).__init__()
     self.cnn = cnn
     self.vit_model = vit_model
+    self.class_token = self.vit_model.class_token
     self.encoder = self.vit_model.encoder
     self.patch_size = self.vit_model.patch_size
     self.image_size = self.vit_model.image_size
