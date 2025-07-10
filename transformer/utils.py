@@ -217,7 +217,7 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
 
   return model
 
-def train_model_wrapper_regnety16f(params, trainloader, trainset, valloader, valset, device, num_epochs):
+def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, valset, device, num_epochs):
   """
   params is list of parameters to optimise
   params[0] = Learning rate of optimiser
