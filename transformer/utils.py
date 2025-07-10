@@ -230,8 +230,8 @@ def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, va
   for param in model.parameters():
     param.requires_grad = False
 
-  n_inputs = model.head.in_features
-  model.head = nn.Sequential(
+  n_inputs = model.fc.in_features
+  model.fc = nn.Sequential(
     nn.Linear(n_inputs, 512),
     nn.ReLU(),
     nn.Dropout(0.3),
