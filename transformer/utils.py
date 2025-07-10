@@ -217,6 +217,44 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
 
   return model
 
+def train_model_wrapper_regnety16f(params, trainloader, trainset, valloader, valset, device, num_epochs):
+  """
+  params is list of parameters to optimise
+  params[0] = Learning rate of optimiser
+  params[1] = gamma of schedular
+  """
+  
+  classes = trainset.classes
+  model = models.regnet_y_16gf(weights = models.RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1).to(device)
+
+  for param in model.parameters():
+    param.requires_grad = False
+
+  n_inputs = model.head.in_features
+  model.head = nn.Sequential(
+    nn.Linear(n_inputs, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, len(classes))
+   )
+  for param in model.trunk_output.block3.parameters():
+    param.requires_grad = True
+
+  for param in model.trunk_output.block4.parameters():
+    param.requires_grad = True
+
+  tune_params = [{'params' : model.trunk_output.block3.parameters()}, {'params' : model.trunk_output.block4.parameters()}, {'params' : model.fc.parameters()}]
+
+  model = model.to(device)
+
+  criterion = LabelSmoothingCrossEntropy()
+  criterion = criterion.to(device)
+  optimizer = optim.AdamW(tune_params, lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
+  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+  model = get_train_model(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
+
+  return model
+
 def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset, device, num_epochs):
   """
   params is list of parameters to optimise
@@ -248,4 +286,5 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
 
   return model
+
 
