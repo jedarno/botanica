@@ -255,6 +255,46 @@ def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, va
 
   return loss
 
+def train_model_wrapper_vit_l(params, trainloader, trainset, valloader, valset, device, num_epochs):
+  """
+  params is list of parameters to optimise
+  params[0] = Learning rate of optimiser
+  params[1] = gamma of schedular
+  """
+  classes = trainset.classes
+  model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
+
+  for param in model.parameters():
+    param.requires_grad = False
+
+  n_inputs = model.heads.head.in_features
+  model.heads.head = nn.Sequential(
+    nn.Linear(n_inputs, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, len(classes))
+  )
+
+  for param in model.encoder.layers.encoder_layer_23.parameters():
+    param.requires_grad = True
+
+  for param in model.encoder.ln.parameters():
+    param.requires_grad = True
+
+  for param in model.heads.head.parameters():
+    param.requires_grad = True
+
+  tune_params = [{'params' : model.encoder.layers.encoder_layer_23.parameters()}, {'params': model.encoder.ln.parameters()}, {'params':  model.heads.head.parameters()}]
+  model = model.to(device)
+
+  criterion = LabelSmoothingCrossEntropy()
+  criterion = criterion.to(device)
+  optimizer = optim.AdamW(tune_params, lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
+  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+  loss = train_model_loss(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
+
+  return loss
+
 def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset, device, num_epochs):
   """
   params is list of parameters to optimise
