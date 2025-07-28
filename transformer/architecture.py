@@ -393,7 +393,7 @@ class concat_vitl_regnety16gf(nn.Module):
     vitl_features = self.vitl(x.clone())
     vitl_features = vitl_features.view(vitl_features.size(0), -1)
     regnety_features = self.regnety16gf(x)
-    regnety_features = regenty_features.view(regnety_features.size(0), -1)
+    regnety_features = regnety_features.view(regnety_features.size(0), -1)
     x = torch.cat((vitl_features, regnety_features), dim=1)
     x = self.classifier(x)
 
