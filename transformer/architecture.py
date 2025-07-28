@@ -383,7 +383,7 @@ class concat_vitl_regnety16gf(nn.Module):
 
     #define new classifier
     self.classifier = nn.Sequential(
-      nn.Linear(1024 + 3012, 1024),
+      nn.Linear(1024 + 3024, 1024),
       nn.ReLU(),
       nn.Dropout(p=0.3, inplace=False),
       nn.Linear(1024, n_classes)
@@ -395,6 +395,7 @@ class concat_vitl_regnety16gf(nn.Module):
     regnety_features = self.regnety16gf(x)
     regnety_features = regnety_features.view(regnety_features.size(0), -1)
     x = torch.cat((vitl_features, regnety_features), dim=1)
+    print(x.shape)
     x = self.classifier(x)
 
     return x
