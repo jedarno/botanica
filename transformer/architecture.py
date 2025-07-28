@@ -389,7 +389,7 @@ class concat_vitl_regnety16gf(nn.Module):
       nn.Linear(1024, n_classes)
      )
 
-  def forward(x):
+  def forward(self, x):
     vitl_features = self.vitl(x.clone())
     vitl_features = vitl_features.view(vitl_features.size(0), -1)
     regnety_features = self.regnety16gf(x)
