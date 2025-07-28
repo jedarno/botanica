@@ -370,4 +370,34 @@ class cnn_vit(nn.Module):
     x = self.classifier(x)
     return x
 
+class concat_vitl_regnety16gf(nn.Module):
+
+  def __init__(self, vitl, regnety16gf, n_classes):
+    super(concat_vitl_regnety16gf, self).__init__()
+    self.vitl = vitl
+    self.regnety16gf = regnety16gf
+
+    #remove classification heads
+    self.vitl.heads.head = nn.Identity()
+    self.regnety16gf.fc = nn.Identity()
+
+    #define new classifier
+    self.classifier = nn.Sequential(
+      nn.Linear(1024 + 3012, 1024),
+      nn.ReLU(),
+      nn.Dropout(p=0.3, inplace=False),
+      nn.Linear(1024, n_classes)
+     )
+
+  def forward(x):
+    vitl_features = self.vitl(x.clone())
+    vitl_features = vitl_features.view(vitl_features.size(0), -1)
+    regnety_features = self.regnety16gf(x)
+    regnety_features = regenty_features.view(regnety_features.size(0), -1)
+    x = torch.cat((vitl_features, regnety_features), dim=1)
+    x = self.classifier(x)
+
+    return x
+    
+
 
