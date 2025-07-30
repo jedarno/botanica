@@ -383,7 +383,10 @@ class concat_vitl_regnety16gf(nn.Module):
 
     #define new classifier
     self.classifier = nn.Sequential(
-      nn.Linear(1024 + 3024, 1024),
+      nn.Linear(1024 + 3024, 2048),
+      nn.ReLU(),
+      nn.Dropout(p=0.3, inplace=False),
+      nn.Linear(2048, 1024),
       nn.ReLU(),
       nn.Dropout(p=0.3, inplace=False),
       nn.Linear(1024, n_classes)
