@@ -421,7 +421,7 @@ class regnety16gf_hybrid_fmap(nn.Module):
     self.classifier = nn.Sequential(
       nn.Linear(head_n_inputs,512),
       nn.ReLU(),
-      nn.Dropout(p=0.3)
+      nn.Dropout(p=0.3),
       nn.Linear(512, n_classes)
      ) 
 
