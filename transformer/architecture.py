@@ -412,7 +412,7 @@ class regnety16gf_hybrid_fmap(nn.Module):
     if weights:
       self.weights = weights
 
-    head_n_inputs = self.fc.in_features
+    head_n_inputs = models[0].fc.in_features
 
     for model in self.models:
       model.fc = nn.Identity()	
