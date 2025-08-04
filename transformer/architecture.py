@@ -402,5 +402,55 @@ class concat_vitl_regnety16gf(nn.Module):
 
     return x
     
+class regnety16gf_hybrid_fmap(nn.Module):
+  
+  def __init__(self, models, n_classes, weights=None):
 
+    super(regnet16gf_hybrid_fmap, self).__init__()
+    self.models = models
 
+    if weights:
+      self.weights = weights
+
+    head_n_inputs = model.fc.in_features
+
+    for model in self.models:
+      model.fc = nn.Identity()	
+
+    #Define new calssifier
+    self.classifier = nnn.Sequential(
+      nn.Linear(head_n_inputs,512,
+      nn.ReLU(),
+      nn.Dropout(p=0.3)
+      nn.Linear(512, n_classes)
+     ) 
+
+  @property
+  def weights(self):
+    return self._weights
+
+  @weights.setter
+  def weights(self, weights):
+    
+    if type(weights) == list:
+      weights = np.array(weights)
+
+    if len(weights) != len(self.models):
+      raise ValueError("The number of weight values provided should match the number of models")
+
+    elif not np.issubtype(weights.dtype, np.number):
+      raise ValueError("Weights should be numeric")
+
+    else:
+      print("New model influence weights: {}".format(weights))
+      self.weights = weights
+
+  def forward(self, x):
+    out = self.weights[0] * self.models[0](x)
+
+    for i in range(1, len(self.models)):
+      out += self.models[i](x) * self.weights[i]
+
+    out = self.classifier(out)
+
+    return out
