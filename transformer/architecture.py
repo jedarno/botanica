@@ -406,7 +406,7 @@ class regnety16gf_hybrid_fmap(nn.Module):
   
   def __init__(self, models, n_classes, weights=None):
 
-    super(regnet16gf_hybrid_fmap, self).__init__()
+    super(regnety16gf_hybrid_fmap, self).__init__()
     self.models = models
 
     if weights:
