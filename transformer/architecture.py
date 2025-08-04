@@ -438,7 +438,7 @@ class regnety16gf_hybrid_fmap(nn.Module):
     if len(weights) != len(self.models):
       raise ValueError("The number of weight values provided should match the number of models")
 
-    elif not np.issubtype(weights.dtype, np.number):
+    elif not np.issubdtype(weights.dtype, np.number):
       raise ValueError("Weights should be numeric")
 
     else:
