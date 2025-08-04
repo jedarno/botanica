@@ -443,7 +443,7 @@ class regnety16gf_hybrid_fmap(nn.Module):
 
     else:
       print("New model influence weights: {}".format(weights))
-      self.weights = weights
+      self._weights = weights
 
   def forward(self, x):
     out = self.weights[0] * self.models[0](x)
