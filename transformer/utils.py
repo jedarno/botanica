@@ -261,7 +261,7 @@ def train_model_wrapper_vit_l(params, trainloader, trainset, valloader, valset, 
   params[0] = Learning rate of optimiser
   params[1] = gamma of schedular
   """
-  if classes = None:
+  if classes == None:
     classes = trainset.classes
 
   model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
