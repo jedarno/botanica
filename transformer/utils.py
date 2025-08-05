@@ -255,13 +255,15 @@ def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, va
 
   return loss
 
-def train_model_wrapper_vit_l(params, trainloader, trainset, valloader, valset, device, num_epochs):
+def train_model_wrapper_vit_l(params, trainloader, trainset, valloader, valset, device, num_epochs, classes=None):
   """
   params is list of parameters to optimise
   params[0] = Learning rate of optimiser
   params[1] = gamma of schedular
   """
-  classes = trainset.classes
+  if classes = None:
+    classes = trainset.classes
+
   model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
 
   for param in model.parameters():
