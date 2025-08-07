@@ -224,7 +224,7 @@ def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, va
   params[1] = gamma of schedular
   """
   
-  if classes = None:
+  if classes == None:
     classes = trainset.classes
 
   model = models.regnet_y_16gf(weights = models.RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1).to(device)
