@@ -464,15 +464,31 @@ class regnety16gf_reduction(nn.Module):
     #we want the encoder from the regnet model
     self.regnet = regnet
     self.regnet.fc = nn.Identity()
-    
-    self.classifier = nn.Sequential(
-      nn.Linear(head_n_inputs,512),
-      nn.ReLU(),
-      nn.Dropout(p=0.3),
-      nn.Linear(512, n_classes)
-     ) 
 
   def forward(self, x):
     x = self.regnet(x)
     x = self.reduce(x)
-    x = self.classifier(x)
+    return x
+
+class vit_l_reduction(nn.Module):
+
+  def __init__(self, vitl, reduce_method):
+    super(vit_l_reduction, self).__init__()
+    self.reduce = reduce_method
+
+    #we want the encoder from vit_l
+    self.vitl = vitl
+    self.vitl.heads.head = nn.Identity()
+    
+  def forward(self, x):
+    x = self.vitl(x)
+    x = self.reduce(x)
+    return x
+
+"""
+class classify_fmap(nn.module):
+
+  def __init__(self, fmap, classifier):
+"""
+
+
