@@ -485,10 +485,15 @@ class vit_l_reduction(nn.Module):
     x = self.reduce(x)
     return x
 
-"""
-class classify_fmap(nn.module):
+class classify_fmap(nn.Module):
 
   def __init__(self, fmap, classifier):
-"""
+    super(classify_fmap, self).__init__()
+    self.fmap = fmap
+    self.classifier = classifier
 
+  def forward(self, x):
+    x = self.fmap(x)
+    x = self.classifier(x)
+    return x
 
