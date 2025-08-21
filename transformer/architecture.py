@@ -372,14 +372,15 @@ class cnn_vit(nn.Module):
 
 class concat_vitl_regnety16gf(nn.Module):
 
-  def __init__(self, vitl, regnety16gf, fmap_size, n_classes):
+  def __init__(self, vitl, regnety16gf, fmap_size, n_classes, has_head = True):
     super(concat_vitl_regnety16gf, self).__init__()
     self.vitl = vitl
     self.regnety16gf = regnety16gf
 
     #remove classification heads
-    self.vitl.heads.head = nn.Identity()
-    self.regnety16gf.fc = nn.Identity()
+    if has_head:
+      self.vitl.heads.head = nn.Identity()
+      self.regnety16gf.fc = nn.Identity()
 
     #define new classifier
     self.classifier = nn.Sequential(
