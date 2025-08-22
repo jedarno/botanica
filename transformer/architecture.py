@@ -387,10 +387,7 @@ class concat_vitl_regnety16gf(nn.Module):
       nn.Linear(fmap_size, 1024),
       nn.ReLU(),
       nn.Dropout(p=0.3, inplace=False),
-      nn.Linear(1024, 512),
-      nn.ReLU(),
-      nn.Dropout(p=0.3, inplace=False),
-      nn.Linear(512, n_classes)
+      nn.Linear(1024, n_classes)
      )
 
   def forward(self, x):
