@@ -495,3 +495,20 @@ class classify_fmap(nn.Module):
     x = self.classifier(x)
     return x
 
+class Siamese_towers(nn.Module):
+  
+  def __init__(self, tower):
+    super(Siamese_towers, self).__init__()
+    self.tower = tower
+
+  def forward(self, x1, x2):
+    tower1 = self.tower(x1)
+    tower2 = self.tower(x2)
+    dis = torch.abs(tower1 - tower2)
+    print(dis.shape)
+    fmap_size = dis.shape[1]
+    mlp  = nn.Linear(fmap_size, 1)
+    x = mlp(dis)
+    return x
+
+
