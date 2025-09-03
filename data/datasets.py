@@ -60,6 +60,10 @@ class BinarySiameseImageFolder(DatasetFolder):
     negative_path = self.samples[negative_index][0]
     negative_image = self.loader(negative_path)
 
+    if self.transform is not None:
+      positive_image = self.transform(positive_image)
+      negative_image = self.transform(negative_image)
+
     #Match the TripletMarginLoss format (a,p,n)
     return anchor_image, positive_image, negative_image
 
