@@ -47,16 +47,16 @@ class BinarySiameseImageFolder(DatasetFolder):
     anchor_image, anchor_class = super().__getitem__(index)
 
     #Positive and negative examples
-    positive_index = self.class_indx[anchor_class][np.random.randint(0, self.class_indx[anchor_class].shape[0])]
+    positive_index = self.class_indx[anchor_class][np.random.randint(0, self.class_indx[anchor_class].shape[0]-1)]
 
     while positive_index == index:
-      positive_index = self.class_indx[anchor_class][np.random.randint(0, self.class_indx[anchor_class].shape[0])]
+      positive_index = self.class_indx[anchor_class][np.random.randint(0, self.class_indx[anchor_class].shape[0]-1)]
 
     positive_path = self.samples[positive_index][0]
     positive_image = self.loader(positive_path)
 
     negative_class = anchor_class+1 % 2
-    negative_index = self.class_indx[negative_class][np.random.randint(0, self.class_indx[negative_class].shape[0])]
+    negative_index = self.class_indx[negative_class][np.random.randint(0, self.class_indx[negative_class].shape[0]-1)]
     negative_path = self.samples[negative_index][0]
     negative_image = self.loader(negative_path)
 
