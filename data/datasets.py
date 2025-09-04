@@ -45,7 +45,6 @@ class BinarySiameseImageFolder(DatasetFolder):
     Return a tuple containing an anchor image and positoive and negative examples (anchor, pos, neg)
     """
     anchor_image, anchor_class = super().__getitem__(index)
-    print("anchor class: ", anchor_class)
 
     #Positive and negative examples
     positive_index = self.class_indx[anchor_class][np.random.randint(0, self.class_indx[anchor_class].shape[0]-1)]
