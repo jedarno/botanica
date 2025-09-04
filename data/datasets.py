@@ -55,7 +55,8 @@ class BinarySiameseImageFolder(DatasetFolder):
 
     positive_path = self.samples[positive_index][0]
     positive_image = self.loader(positive_path)
-
+    print("anchor_class + 1", anchorclass+1)
+    print("mod2: ", anchor_class+1 % 2)
     negative_class = anchor_class+1 % 2
     print("negative class: ", negative_class)
     negative_index = self.class_indx[negative_class][np.random.randint(0, self.class_indx[negative_class].shape[0]-1)]
