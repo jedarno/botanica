@@ -71,4 +71,73 @@ class BinarySiameseImageFolder(DatasetFolder):
     #Match the TripletMarginLoss format (a,p,n)
     return anchor_image, positive_image, negative_image
 
+class BinaryFewShot(DatasetFolder):
 
+  def __init__(
+        self,
+        root: Union[str, Path],
+        n_shot = 3,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        loader: Callable[[str], Any] = default_loader,
+        is_valid_file: Optional[Callable[[str], bool]] = None,
+        ):
+
+        super().__init__(
+            root,
+            loader,
+            IMG_EXTENSIONS if is_valid_file is None else None,
+            transform=transform,
+            target_transform=target_transform,
+            is_valid_file=is_valid_file,
+        )
+        self.imgs = self.samples
+        self.n_shot = n_shot
+        self.get_class_index()
+    
+  def get_class_index(self):
+    np_targets = np.array(self.targets)
+    self.class_indx = {}
+
+    for i in range(0,2):
+      self.class_indx[i] = np.where(np_targets == i)[0]
+
+  def __getitem__(self, index):
+    """
+    Return image plus a support set for both classes
+    """
+    anchor_image, anchor_class = super().__getitem__(index)
+
+    #support sets
+    #For first class
+    class1_support_set = []
+    for n in range(self.n_shot):
+      image_indx = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)] 
+      while image_indx == index:
+        image_indx = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)]  
+      image_path = self.samples[image_indx][0]
+      image = self.loader(image_path)
+      if self.transform is not None:
+        image = self.transform(image)
+      class1_support_set.append(image)
+
+    #class2_support_set = []
+    class2_support_set = []
+    for n in range(self.n_shot):
+      image_indx = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)] 
+      while image_indx == index:
+        image_indx = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)]  
+      image_path = self.samples[image_indx][0]
+      image = self.loader(image_path)
+      if self.transform is not None:
+        image = self.transform(image)
+      class2_support_set.append(image)
+
+
+    return anchor_image, class1_support_set, class2_support_set
+
+      
+
+
+    
+    
