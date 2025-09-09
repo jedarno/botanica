@@ -111,33 +111,30 @@ class BinaryFewShot(DatasetFolder):
     #support sets
     #For first class
     class1_support_set = []
-    for n in range(self.n_shot):
-      image_indx = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)] 
-      while image_indx == index:
-        image_indx = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)]  
-      image_path = self.samples[image_indx][0]
-      image = self.loader(image_path)
-      if self.transform is not None:
-        image = self.transform(image)
-      class1_support_set.append(image)
-
-    #class2_support_set = []
     class2_support_set = []
     for n in range(self.n_shot):
-      image_indx = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)] 
-      while image_indx == index:
-        image_indx = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)]  
-      image_path = self.samples[image_indx][0]
-      image = self.loader(image_path)
-      if self.transform is not None:
-        image = self.transform(image)
-      class2_support_set.append(image)
+      image_indx1 = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)] 
 
+      while image_indx1 == index:
+        image_indx1 = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)]  
+
+      image_indx2 = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)] 
+
+      while image_indx2 == index:
+        image_indx2 = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)]  
+
+      image_path1 = self.samples[image_indx1][0]
+      image_path2 = self.samples[image_indx2][0]
+      image1 = self.loader(image_path1)
+      iamge2 = self.loader(image_path2)
+
+      if self.transform is not None:
+        image1 = self.transform(image1)
+        image2 = self.transform(iamge2)
+
+      class1_support_set.append(image1)
+      class2_support_set.append(image2)
 
     return anchor_image, class1_support_set, class2_support_set
 
       
-
-
-    
-    
