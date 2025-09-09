@@ -497,7 +497,7 @@ class classify_fmap(nn.Module):
 
 class Siamese_towers(nn.Module):
   
-  def __init__(self, tower, fmap_size):
+  def __init__(self, tower):
     super(Siamese_towers, self).__init__()
     self.tower = tower
 
