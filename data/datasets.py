@@ -71,7 +71,38 @@ class BinarySiameseImageFolder(DatasetFolder):
     #Match the TripletMarginLoss format (a,p,n)
     return anchor_image, positive_image, negative_image
 
-class BinaryFewShot(DatasetFolder):
+  def get_support_set(self, n_shot)
+    """
+    Return image plus a support set for both classes
+    """
+
+    #support sets
+    #For first class
+    class1_support_set = []
+    class2_support_set = []
+    for n in range(self.n_shot):
+      image_indx1 = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)] 
+
+      while image_indx1 == index:
+        image_indx1 = self.class_indx[0][np.random.randint(0, self.class_indx[0].shape[0]-1)]  
+
+      image_indx2 = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)] 
+
+      image_path1 = self.samples[image_indx1][0]
+      image_path2 = self.samples[image_indx2][0]
+      image1 = self.loader(image_path1)
+      iamge2 = self.loader(image_path2)
+
+      if self.transform is not None:
+        image1 = self.transform(image1)
+        image2 = self.transform(iamge2)
+
+      class1_support_set.append(image1)
+      class2_support_set.append(image2)
+
+    return class1_support_set, class2_support_set
+
+class BinarySupportSet(DatasetFolder):
 
   def __init__(
         self,
@@ -106,7 +137,6 @@ class BinaryFewShot(DatasetFolder):
     """
     Return image plus a support set for both classes
     """
-    anchor_image, anchor_class = super().__getitem__(index)
 
     #support sets
     #For first class
@@ -120,9 +150,6 @@ class BinaryFewShot(DatasetFolder):
 
       image_indx2 = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)] 
 
-      while image_indx2 == index:
-        image_indx2 = self.class_indx[1][np.random.randint(0, self.class_indx[1].shape[0]-1)]  
-
       image_path1 = self.samples[image_indx1][0]
       image_path2 = self.samples[image_indx2][0]
       image1 = self.loader(image_path1)
@@ -135,6 +162,6 @@ class BinaryFewShot(DatasetFolder):
       class1_support_set.append(image1)
       class2_support_set.append(image2)
 
-    return anchor_image, class1_support_set, class2_support_set
+    return class1_support_set, class2_support_set
 
       
