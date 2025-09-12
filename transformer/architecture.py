@@ -36,7 +36,6 @@ class transformer_ensemble_avg(nn.Module):
     self.models = models
     self.sftmx = nn.Softmax(dim=1)
 
-  def forward(self, x):
     """
     parameters
     ----------
@@ -510,4 +509,22 @@ class Siamese_towers(nn.Module):
   def get_tower(self):
     return self.tower
 
+class SiameseFewShot(nn.Module):
+
+  def __init__(self, embedding_model, dist_func):
+    super(SiameseFewShot, self).__init__()
+    self.embedding_model = embedding_model
+    self.dist_func = dist_func
+
+  def forward(self, query_images, support_set):
+    
+    query_embeddings = self.embedding_model(query_images)
+    class_embeddings = self.embedding_model(support_set)
+
+    dist = self.dist_func(query_embeddings, class_embeddings)
+    scores = -dist
+
+    return scores
+      
+      
 
