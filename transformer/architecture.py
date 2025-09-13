@@ -494,10 +494,10 @@ class classify_fmap(nn.Module):
     x = self.classifier(x)
     return x
 
-class Siamese_towers(nn.Module):
+class SiameseTowers(nn.Module):
   
   def __init__(self, tower):
-    super(Siamese_towers, self).__init__()
+    super(SiameseTowers, self).__init__()
     self.tower = tower
 
   def forward(self, x1, x2, x3):
@@ -527,4 +527,3 @@ class SiameseFewShot(nn.Module):
     return scores
       
       
-
