@@ -331,4 +331,79 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
   return model
 
+def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1):
+    """
 
+    Args:
+      model: Architecture and its pretrained weights
+      criterion: The loss function
+      optimizer: Optimisation algorithm
+      scheduler: Learning rate Scheduler
+      num_epochs: How many epochs model is trained for
+
+    Returns: The trained model
+    """
+
+    since = time.time()
+
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_loss = float('inf')
+
+    for epoch in range(num_epochs):
+      print(f'Epoch {epoch}/{num_epochs - 1}')
+      print('-' * 10)
+
+      #Perform train and val stages for each epoch
+      for phase in ['train', 'val']:
+        if phase == 'train':
+          model.train()  # Set model to training mode
+          dataloader = trainloader
+          size = len(trainset)
+        else:
+          model.eval()   # Set model to evaluate mode
+          dataloader = valloader
+          size = len(valset)
+
+        running_loss = 0.0
+
+        #iterating over batch
+        for anchor, pos, neg, _  in dataloader:
+          anchor = anchor.to(device)
+          pos = pos.to(device)
+          neg = neg.to(device)
+
+          # zero the parameter gradients
+          optimizer.zero_grad()
+
+          # forward
+          anchor_embedding, positive_embedding, negative_embedding = model(anchor, pos, neg)
+          # track history if only in train
+          with torch.set_grad_enabled(phase == 'train'):
+            loss = criterion(anchor_embedding, positive_embedding, negative_embedding)
+
+            #backwards + optimise only if training
+            if phase == 'train':
+              loss.backward()
+              optimizer.step()
+
+          #statistics
+          running_loss += loss.item() * anchor.size(0)
+
+        if phase == 'train':
+          scheduler.step()
+
+        epoch_loss = running_loss / size
+
+        print(f'{phase} Loss: {epoch_loss:.4f}')
+
+        # deep copy the model
+        if phase == 'val' and epoch_loss < best_loss:
+          best_loss = epoch_loss
+          best_model_wts = copy.deepcopy(model.state_dict())
+
+    time_elapsed = time.time() - since
+    print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+
+    # load best model weights
+    model.load_state_dict(best_model_wts)
+    return model
