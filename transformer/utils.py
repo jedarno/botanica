@@ -361,6 +361,7 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           size = len(trainset)
         else:
           model.eval()   # Set model to evaluate mode
+          support_set1, support_set2 = trainset.get_support_set(3)
           dataloader = valloader
           size = len(valset)
 
