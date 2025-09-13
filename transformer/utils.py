@@ -331,7 +331,7 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
   return model
 
-def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1, n_shot=3):
+def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, dist_func, num_epochs=1, n_shot=3):
     """
 
     Args:
@@ -361,6 +361,12 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           size = len(trainset)
         else:
           model.eval()   # Set model to evaluate mode
+          support_set1, support_set2 = trainset.get_support_set(n_shot)
+
+          if device:
+            support_set1 = support_set1.to(device)
+            support_set2 = support_set2.to(device)
+          
           dataloader = valloader
           size = len(valset)
 
@@ -380,6 +386,26 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           # track history if only in train
           with torch.set_grad_enabled(phase == 'train'):
             loss = criterion(anchor_embedding, positive_embedding, negative_embedding)
+            if phase == 'val':
+              print(support_set1.shape)
+              print(support_set2.shape)
+              support_embeddings_cls1 = model.tower(support_set1)
+              print(support_embeddings_cls1.shape)
+              support_embeddings_cls2 = model.tower(support_set2)
+              print(support_embeddings_cls2.shape)
+              dist_class1 = 0
+              dist_class2 = 0
+
+              for n in range(n_shot):
+                dist_class1 += dist_func(anchor_embedding, support_embeddings_cls1[n])
+                print("dist_class1: ", dist_class1.shape)
+                dist_class2 += dist_func(anchor_embedding, support_embeddings_cls2[n])
+                print("dist_class2: ", dist_class2.shape)
+              
+              score_class1 = - dist_class1
+              print("score1: ", score_class1)
+              score_class2 = - dist_class2
+              print("score1: ", score_class2)
 
             #backwards + optimise only if training
             if phase == 'train':
