@@ -90,3 +90,10 @@ def run_topk_test(model, classes, testloader, testset, criterion, device):
   print('top_k acc: {:.4f}, {:.4f}, {:.4f}'.format(top_1, top_3, top_5))
 
   return (top_1, top_3, top_5, test_loss)
+
+def few_shot_test(model, classes, testloader, testset, criterion, device, n_shot=3):
+  criterion = criterion.to(device)
+  test_loss = 0.0
+  pass
+
+
