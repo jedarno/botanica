@@ -331,7 +331,7 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
   return model
 
-def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1):
+def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1, n_shot=3):
     """
 
     Args:
@@ -361,7 +361,7 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           size = len(trainset)
         else:
           model.eval()   # Set model to evaluate mode
-          support_set1, support_set2 = trainset.get_support_set(3)
+          support_set1, support_set2 = trainset.get_support_set(n_shot)
           dataloader = valloader
           size = len(valset)
 
