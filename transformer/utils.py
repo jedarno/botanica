@@ -331,9 +331,9 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
   return model
 
+
 def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1, n_shot=3):
     """
-
     Args:
       model: Architecture and its pretrained weights
       criterion: The loss function
@@ -428,8 +428,11 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           scheduler.step()
 
         epoch_loss = running_loss / size
+        epoch_acc = running_corrects / size
 
         print(f'{phase} Loss: {epoch_loss:.4f}')
+        if phase == 'val':
+          print(f'{phase} acc: {epoch_acc:.4f}')
 
         # deep copy the model
         if phase == 'val' and epoch_loss < best_loss:
@@ -442,3 +445,5 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model
+
+
