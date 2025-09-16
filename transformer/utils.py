@@ -331,7 +331,7 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
   return model
 
-def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, dist_func, num_epochs=1, n_shot=3):
+def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1, n_shot=3):
     """
 
     Args:
@@ -387,38 +387,28 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           with torch.set_grad_enabled(phase == 'train'):
             loss = criterion(anchor_embeddings, positive_embeddings, negative_embeddings)
             if phase == 'val':
-              print(support_set1.shape)
-              print(support_set2.shape)
               support_embeddings_cls1 = model.tower(support_set1)
-              print(support_embeddings_cls1.shape)
               support_embeddings_cls2 = model.tower(support_set2)
-              print(support_embeddings_cls2.shape)
               dist_class1 = 0
               dist_class2 = 0
               
               batch_size = anchor_embeddings.shape[0]
-              print("batch_size: ", batch_size)
               pdist = nn.PairwiseDistance(p=2)
               batch_scores = []
+
               for i in range(batch_size):
                 anchor_embedding = anchor_embeddings[i]
 
                 for n in range(n_shot):
                   dist_class1 += pdist(anchor_embedding, support_embeddings_cls1[n])
-                  print("dist_class1: ", dist_class1.shape)
                   dist_class2 += pdist(anchor_embedding, support_embeddings_cls2[n])
-                  print("dist_class2: ", dist_class2.shape)
               
                 score_class1 = - dist_class1
-                print("score1: ", score_class1)
                 score_class2 = - dist_class2
-                print("score1: ", score_class2)
                 scores = torch.stack((score_class1, score_class2))
-                print("scores: ", scores)
                 batch_scores.append(scores)
 
               batch_scores = torch.stack(batch_scores)
-              print("batch scores: ", batch_scores.shape)
               _, pred = torch.max(batch_scores,1)
               print("Pred: ", pred)
               print("ground_truth: ", labels.data)
@@ -449,3 +439,5 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model
+
+
