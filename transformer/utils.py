@@ -371,12 +371,14 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
           size = len(valset)
 
         running_loss = 0.0
+        running_corrects = 0
 
         #iterating over batch
         for anchor, pos, neg, labels  in dataloader:
           anchor = anchor.to(device)
           pos = pos.to(device)
           neg = neg.to(device)
+          labels = labels.to(device)
 
           # zero the parameter gradients
           optimizer.zero_grad()
@@ -389,15 +391,14 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
             if phase == 'val':
               support_embeddings_cls1 = model.tower(support_set1)
               support_embeddings_cls2 = model.tower(support_set2)
-              dist_class1 = 0
-              dist_class2 = 0
-              
               batch_size = anchor_embeddings.shape[0]
               pdist = nn.PairwiseDistance(p=2)
               batch_scores = []
 
               for i in range(batch_size):
                 anchor_embedding = anchor_embeddings[i]
+                dist_class1 = 0
+                dist_class2 = 0
 
                 for n in range(n_shot):
                   dist_class1 += pdist(anchor_embedding, support_embeddings_cls1[n])
@@ -412,6 +413,8 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
               _, pred = torch.max(batch_scores,1)
               print("Pred: ", pred)
               print("ground_truth: ", labels.data)
+              running_corrects += torch.sum(pred == labels.data)
+              print("running corrects: ", running_corrects)
     
             #backwards + optimise only if training
             if phase == 'train':
@@ -439,5 +442,3 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model
-
-
