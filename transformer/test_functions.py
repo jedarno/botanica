@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from tqdm import tqdm
 
 
@@ -91,9 +92,50 @@ def run_topk_test(model, classes, testloader, testset, criterion, device):
 
   return (top_1, top_3, top_5, test_loss)
 
-def few_shot_test(model, classes, testloader, testset, criterion, device, n_shot=3):
-  criterion = criterion.to(device)
+def few_shot_test(model, classes, testloader, testset, device, n_shot=3):
+  #TODO: remove support set generation and take as a parameter
+  #TODO: get n_shot from sup set size and remove redundant parameter
+  #TODO: Check support set dims match
+  #TODO: add loss tracking using triplet margin loss
   test_loss = 0.0
-  pass
+  running_corrects = 0
+  pdist = nn.PairwiseDistance(p=2)
+  size = len(testset)
 
+  support_set1, support_set2 = testset.get_support_set(n_shot)
+
+  if device:
+    support_set1, support_set2 = support_set1.to(device), support_set2.to(device)
+
+  for anchor, _, _, label in tqdm(testloader):
+    anchor, label = anchor.to(device), label.to(device)
+
+    with torch.no_grad(): 
+      anchor_embeddings = model.tower(anchor)
+      support_embeddings1 = model.tower(support_set1)
+      support_embeddings2 = model.tower(support_set2)
+      batch_scores = []
+      batch_size = anchor_embeddings.size(0)
+      
+      for i in range(batch_size):
+        anchor_embedding = anchor_embeddings[i]
+        dist_class1 = 0
+        dist_class2 = 0
+
+        for n in range(n_shot):
+          dist_class1 += pdist(anchor_embedding, support_embeddings1[n])
+          dist_class2 += pdist(anchor_embedding, support_embeddings2[n])
+
+        score_class1 = -dist_class1
+        score_class2 = -dist_class2
+        scores = torch.stack((score_class1, score_class2))
+        batch_scores.append(scores)
+
+    batch_scores = torch.stack(batch_scores)
+    _, pred = torch.max(batch_scores,1)
+    running_corrects += torch.sum(pred == label.data)
+
+  epoch_acc = running_corrects / size
+  print(epoch_acc)
+        
 
