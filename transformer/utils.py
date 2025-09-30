@@ -336,9 +336,7 @@ def binary_support_set_prediction(anchor_embeddings, support_embeddings_cls1, su
   pdist = nn.PairwiseDistance(p=2)
   batch_scores = []
   batch_size = anchor_embeddings.size(0)
-  print("batch size: ", batch_size)
   n_shot = support_embeddings_cls1.size(0)
-  print("n_shot: ", n_shot)
 
   for i in range(batch_size):
     anchor_embedding = anchor_embeddings[i]
@@ -414,10 +412,7 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
               support_embeddings_cls1 = model.tower(support_set1)
               support_embeddings_cls2 = model.tower(support_set2)
               pred = binary_support_set_prediction(anchor_embeddings, support_embeddings_cls1, support_embeddings_cls2)
-              print("Pred: ", pred)
-              print("ground_truth: ", labels.data)
               running_corrects += torch.sum(pred == labels.data)
-              print("running corrects: ", running_corrects)
     
             if phase == 'train': #backwards + optimise only if training
               loss.backward()
