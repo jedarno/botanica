@@ -332,6 +332,34 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
   return model
 
 
+def binary_support_set_prediction(anchor_embeddings, support_embeddings_cls1, support_embeddings_cls2):
+  pdist = nn.PairwiseDistance(p=2)
+  batch_scores = []
+  batch_size = anchor_embeddings.size(0)
+  print("batch size: ", batch_size)
+  n_shot = support_embeddings_cls1.size(0)
+  print("n_shot: ", n_shot)
+
+  for i in range(batch_size):
+    anchor_embedding = anchor_embeddings[i]
+    dist_class1 = 0
+    dist_class2 = 0
+
+    for n in range(n_shot):
+      dist_class1 += pdist(anchor_embedding, support_embeddings_cls1[n])
+      dist_class2 += pdist(anchor_embedding, support_embeddings_cls2[n])
+              
+    score_class1 = - dist_class1
+    score_class2 = - dist_class2
+    scores = torch.stack((score_class1, score_class2))
+    batch_scores.append(scores)
+    
+  batch_scores = torch.stack(batch_scores)
+  _, pred = torch.max(batch_scores,1)
+
+  return pred
+
+
 def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, trainset, valloader, valset, device, num_epochs=1, n_shot=3):
     """
     Args:
@@ -353,14 +381,13 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
       print(f'Epoch {epoch}/{num_epochs - 1}')
       print('-' * 10)
 
-      #Perform train and val stages for each epoch
-      for phase in ['train', 'val']:
+      for phase in ['train', 'val']:#Perform train and val stages for each epoch
         if phase == 'train':
-          model.train()  # Set model to training mode
+          model.train()  
           dataloader = trainloader
           size = len(trainset)
         else:
-          model.eval()   # Set model to evaluate mode
+          model.eval()   
           support_set1, support_set2 = trainset.get_support_set(n_shot)
 
           if device:
@@ -373,55 +400,29 @@ def triplet_train_model(model, criterion, optimizer, scheduler, trainloader, tra
         running_loss = 0.0
         running_corrects = 0
 
-        #iterating over batch
-        for anchor, pos, neg, labels  in dataloader:
+        for anchor, pos, neg, labels  in dataloader: #iterating over batch
           anchor = anchor.to(device)
           pos = pos.to(device)
           neg = neg.to(device)
           labels = labels.to(device)
+          optimizer.zero_grad() # zero the parameter gradients
+          anchor_embeddings, positive_embeddings, negative_embeddings = model(anchor, pos, neg)# forward pass
 
-          # zero the parameter gradients
-          optimizer.zero_grad()
-
-          # forward
-          anchor_embeddings, positive_embeddings, negative_embeddings = model(anchor, pos, neg)
-          # track history if only in train
-          with torch.set_grad_enabled(phase == 'train'):
+          with torch.set_grad_enabled(phase == 'train'): # track history if only in train
             loss = criterion(anchor_embeddings, positive_embeddings, negative_embeddings)
             if phase == 'val':
               support_embeddings_cls1 = model.tower(support_set1)
               support_embeddings_cls2 = model.tower(support_set2)
-              batch_size = anchor_embeddings.shape[0]
-              pdist = nn.PairwiseDistance(p=2)
-              batch_scores = []
-
-              for i in range(batch_size):
-                anchor_embedding = anchor_embeddings[i]
-                dist_class1 = 0
-                dist_class2 = 0
-
-                for n in range(n_shot):
-                  dist_class1 += pdist(anchor_embedding, support_embeddings_cls1[n])
-                  dist_class2 += pdist(anchor_embedding, support_embeddings_cls2[n])
-              
-                score_class1 = - dist_class1
-                score_class2 = - dist_class2
-                scores = torch.stack((score_class1, score_class2))
-                batch_scores.append(scores)
-
-              batch_scores = torch.stack(batch_scores)
-              _, pred = torch.max(batch_scores,1)
+              pred = binary_support_set_prediction(anchor_embeddings, support_embeddings_cls1, support_embeddings_cls2)
               print("Pred: ", pred)
               print("ground_truth: ", labels.data)
               running_corrects += torch.sum(pred == labels.data)
               print("running corrects: ", running_corrects)
     
-            #backwards + optimise only if training
-            if phase == 'train':
+            if phase == 'train': #backwards + optimise only if training
               loss.backward()
               optimizer.step()
 
-          #statistics
           running_loss += loss.item() * anchor.size(0)
 
         if phase == 'train':
