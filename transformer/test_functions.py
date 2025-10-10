@@ -101,7 +101,6 @@ def few_shot_test(model, classes, testloader, testset, device, support_set1, sup
   size = len(testset)
 
   n_shot = len(support_set1)
-  print("n_shot: ", n_shot)
 
   if device:
     support_set1, support_set2 = support_set1.to(device), support_set2.to(device)
