@@ -92,9 +92,7 @@ def run_topk_test(model, classes, testloader, testset, criterion, device):
 
   return (top_1, top_3, top_5, test_loss)
 
-def few_shot_test(model, classes, testloader, testset, device, n_shot=3):
-  #TODO: remove support set generation and take as a parameter
-  #TODO: get n_shot from sup set size and remove redundant parameter
+def few_shot_test(model, classes, testloader, testset, device, support_set1, support_set2):
   #TODO: Check support set dims match
   #TODO: add loss tracking using triplet margin loss
   test_loss = 0.0
@@ -102,7 +100,8 @@ def few_shot_test(model, classes, testloader, testset, device, n_shot=3):
   pdist = nn.PairwiseDistance(p=2)
   size = len(testset)
 
-  support_set1, support_set2 = testset.get_support_set(n_shot)
+  n_shot = len(support_set1)
+  print("n_shot: ", n_shot)
 
   if device:
     support_set1, support_set2 = support_set1.to(device), support_set2.to(device)
