@@ -2,28 +2,33 @@
 Functions for using swarm optimiser to select a model suite
 """
 
-def model_wrapper(swarm_values, models, thershold, trainloader, trainset, valloader, vallset, device, num_spochs):
+def model_wrapper(swarm_values, ensemble_arch,  models, threshold):
   """
-  Function to return the fitness of the current swarm position
+  Function to return the ensemble model using swarm values and threshold
   
   ------------------------------------------------------------------
   Parameters
 
   + swarm_values: iterable of floats
+  + ensemble_arch:nn.Module
   + models: list of torch nn.Module instances 
   + threshold:float Only inlude models whos swarm value is above the threshold
-  + trainloader:Dataloader
-  + trainset 
-  + valloader:Dataloader
-  + vallset
-  + device
-  + num_epochs:int
 
   Returns
 
   Ensemble model using swarm selected suite
   """
+  
+  modelset = [] 
 
+  for i, model in enumerate(models):
+
+    if swarm_values[i] >= threshold:
+      modelset.append(model)
+
+
+  print(modelset)
+  #ensemble_model = ensemble_arch(modelset)  
   pass
 
 
