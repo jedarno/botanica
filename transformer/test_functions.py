@@ -98,6 +98,7 @@ def few_shot_test(model, classes, testloader, testset, device, support_set1, sup
   running_corrects = 0
   pdist = nn.PairwiseDistance(p=2)
   size = len(testset)
+  triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2, eps=1e-7)
 
   if len(support_set1) == len(support_set2):
     n_shot = len(support_set1)
