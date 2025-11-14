@@ -2,7 +2,7 @@
 Functions for using swarm optimiser to select a model suite
 """
 
-def model_wrapper(swarm_values, ensemble_arch,  models, threshold):
+def _model_wrapper(swarm_values, ensemble_arch,  models, threshold):
   """
   Function to return the ensemble model using swarm values and threshold
   
@@ -28,11 +28,12 @@ def model_wrapper(swarm_values, ensemble_arch,  models, threshold):
 
 
   print(modelset)
-  #ensemble_model = ensemble_arch(modelset)  
-  pass
+  ensemble_model = ensemble_arch(modelset)  
+
+  return ensemble_model
 
 
-def swarm_wrapper(position):
+def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, trainloader, trainset, valloader, valset, device, num_epochs):
   """
   Function to take the swarm position and return fitness using the model wrapper
 
@@ -42,6 +43,10 @@ def swarm_wrapper(position):
   returns 
   fitness:iterable:float
   """
+  
+  classes = trainset.classes
+  ensemble = _model_wrapper(swarm_values, ensemble_arch,  models, threshold)
+
 
   pass
 

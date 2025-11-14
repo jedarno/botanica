@@ -36,6 +36,8 @@ class transformer_ensemble_avg(nn.Module):
     self.models = models
     self.sftmx = nn.Softmax(dim=1)
 
+  def forward(x):
+
     """
     parameters
     ----------
