@@ -1,6 +1,6 @@
 import torch.optim as optim
 from timm.loss import LabelSmoothingCrossEntropy
-from test_functions import run_topk_test
+from .test_functions import run_topk_test
 """
 Functions for using swarm optimiser to select a model suite
 """
