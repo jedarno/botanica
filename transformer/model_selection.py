@@ -1,4 +1,6 @@
 import torch.optim as optim
+
+from torchvision import models
 from timm.loss import LabelSmoothingCrossEntropy
 from .test_functions import run_topk_test
 """
