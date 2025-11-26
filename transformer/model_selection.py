@@ -82,4 +82,29 @@ def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, trainloader,
   return val_loss
 
 
-  
+def get_vit_l_arch():
+  model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
+
+  for param in model.parameters():
+    param.requires_grad = False
+
+  n_inputs = model.heads.head.in_features
+  model.heads.head = nn.Sequential(
+    nn.Linear(n_inputs, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, len(classes))
+  )
+
+  for param in model.encoder.layers.encoder_layer_23.parameters():
+    param.requires_grad = True
+
+  for param in model.encoder.ln.parameters():
+    param.requires_grad = True
+
+  for param in model.heads.head.parameters():
+    param.requires_grad = True
+
+  return model
+
+
