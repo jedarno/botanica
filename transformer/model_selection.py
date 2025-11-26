@@ -1,4 +1,5 @@
 import torch.optim as optim
+import torch.nn as nn
 
 from torchvision import models
 from timm.loss import LabelSmoothingCrossEntropy
