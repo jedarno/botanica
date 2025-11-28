@@ -110,4 +110,15 @@ def get_vit_l_arch(n_classes):
 
   return model
 
+def get_regnet_arch(n_classes):
+  model = models.regnet_y_16gf(weights = models.RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1).to(device)
+
+  for param in model.trunk_output.block3.parameters():
+    param.requires_grad = True
+
+  for param in model.trunk_output.block4.parameters():
+    param.requires_grad = True
+
+  return model
+
 
