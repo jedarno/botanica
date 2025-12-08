@@ -81,11 +81,13 @@ def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trai
   
   #val_acc and loss 
   val_scores = run_topk_test(model, classes, valloader, valset, criterion, device)
+  val_acc = val_scores[0].item()
   val_loss = val_scores[3]
   print("val scores: ", val_scores)
+  print("val acc: ", val_acc)
 
   #fitness = (k1 * val_loss) + (k2/len(models) *  len(ensemble.models))
-  fitness = -((k1 * val_acc + k2) * 1/(len(ensemble.models)))
+  fitness = -((k1 * val_acc) + (k2 * 1/(len(ensemble.models))))
 
   return fitness
 
