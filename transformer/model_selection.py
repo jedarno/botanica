@@ -47,7 +47,7 @@ def _model_wrapper(swarm_values, ensemble_arch,  models, threshold):
   return ensemble_model
 
 
-def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trainloader, trainset, valloader, valset, device):
+def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trainloader, trainset, valloader, valset, device, weights = None):
   """
   Function to take the swarm position and return fitness using the model wrapper
 
@@ -84,7 +84,8 @@ def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trai
   val_loss = val_scores[3]
   print("val scores: ", val_scores)
 
-  fitness = (k1 * val_loss) + (k2/len(models) *  len(ensemble.models))
+  #fitness = (k1 * val_loss) + (k2/len(models) *  len(ensemble.models))
+  fitness = -((k1 * val_acc + k2) * 1/(len(ensemble.models)))
 
   return fitness
 
