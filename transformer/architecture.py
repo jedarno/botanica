@@ -75,8 +75,11 @@ class transformer_ensemble_weighted(nn.Module):
         super(transformer_ensemble_weighted, self).__init__() 
         self.models = models
         self.sftmx = nn.Softmax(dim=1)
+
         if weights:
                 self.weights = weights
+        else:
+          self.weights = np.array([1] * len(self.models))
 
     @property
     def weights(self):
@@ -410,6 +413,9 @@ class regnety16gf_hybrid_fmap(nn.Module):
 
     if weights:
       self.weights = weights
+    else:
+      print("setting default weighting")
+      self.weights = np.array([1] * len(self.models))
 
     head_n_inputs = models[0].fc.in_features
 
