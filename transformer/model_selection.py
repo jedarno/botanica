@@ -77,14 +77,11 @@ def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trai
   
   #train_acc and loss 
   train_scores = run_topk_test(ensemble, classes, trainloader, trainset, criterion, device)
-  print("train scores: ", train_scores)
   
   #val_acc and loss 
   val_scores = run_topk_test(ensemble, classes, valloader, valset, criterion, device)
   val_acc = val_scores[0].item()
   val_loss = val_scores[3]
-  print("val scores: ", val_scores)
-  print("val acc: ", val_acc)
 
   #fitness = (k1 * val_loss) + (k2/len(models) *  len(ensemble.models))
   fitness = -((k1 * val_acc) + (k2 * 1/(len(ensemble.models))))
@@ -119,6 +116,17 @@ def get_vit_l_arch(n_classes):
 
 def get_regnet_arch(n_classes):
   model = models.regnet_y_16gf(weights = models.RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1)
+
+  for param in model.parameters():
+    param.requires_grad = False
+
+  n_inputs = model.fc.in_features
+  model.fc = nn.Sequential(
+    nn.Linear(n_inputs, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, n_classes)
+  )
 
   for param in model.trunk_output.block3.parameters():
     param.requires_grad = True
