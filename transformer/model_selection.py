@@ -120,8 +120,31 @@ def get_suite_outputs(modelsuite, dataloader, device):
 
 def get_ensemble_output(output_vals, weights):
 
-  batch_num = len(output_vals[0])
-  print("batch_num: ", batch_num)
+  sftmx = nn.Softmax(dim=1)
+  ensemble_out = weights[0] * sftmx(output_vals[0])
+  print(ensemble_out)
+
+  for i in range(1, len(output_vals)):
+    ensemble_out += weights[i] * sftmx(output_vals[i])
+    print(ensemble_out)
+
+  return ensemble_out
+
+def get_model_suite(swarm_values, models, threshold):
+  model_suite = []
+
+  for i, model in enumerate(models):
+    
+    if swarm_values[i] >= threshold:
+      model_suite.append(model)
+
+  return model_suite
+
+def fitness_wrapper_ensemble_out(model_suite, k_vals, device, classes, trainloader, valloader, weights=None):
+  
+  k1, k2 = k_vals
+  
+  criterion = LabelSmoothingCrossEntropy()
 
 def get_vit_l_arch(n_classes):
   model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
