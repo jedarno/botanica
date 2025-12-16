@@ -1,8 +1,11 @@
 import torch.optim as optim
 import torch.nn as nn
 
+from torch import cat
 from torchvision import models
 from timm.loss import LabelSmoothingCrossEntropy
+from tqdm import tqdm
+
 from .test_functions import run_topk_test
 """
 Functions for using swarm optimiser to select a model suite
@@ -89,6 +92,37 @@ def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trai
   return fitness
 
 
+def _get_model_output(model, dataloader, device):
+
+  model.eval()
+  batched_output = []
+
+  for data, _ in tqdm(dataloader):
+    data = data.to(device)
+    output= model(data)
+    batched_output.append(output)
+
+  output = cat(batched_output, dim=0)
+  return output
+
+def get_suite_outputs(modelsuite, dataloader, device):
+  """   
+  For each model store output in a pandas data frame indexed by batch. Then save to a csv file. 
+  """
+
+  outputs = []
+
+  for model in modelsuite: 
+    model_output = _get_model_output(model, dataloader, device)
+    outputs.append(model_output)
+
+  return outputs
+
+def get_ensemble_output(output_vals, weights):
+
+  batch_num = len(output_vals[0])
+  print("batch_num: ", batch_num)
+
 def get_vit_l_arch(n_classes):
   model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
 
@@ -113,6 +147,7 @@ def get_vit_l_arch(n_classes):
     param.requires_grad = True
 
   return model
+
 
 def get_regnet_arch(n_classes):
   model = models.regnet_y_16gf(weights = models.RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1)
