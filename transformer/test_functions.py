@@ -73,7 +73,7 @@ def run_topk_test(model, classes, testloader, testset, criterion, device):
       with torch.no_grad(): # turn off autograd for faster testing
           output = model(data)
           loss = criterion(output, target)
-      test_loss = loss.item() * data.size(0)
+      test_loss += loss.item() * data.size(0)
       #_, pred = torch.max(output, 1)
       top_k = topk_accuracy(output, target, (1,3,5))
       sum_top_1 += top_k[0][0]

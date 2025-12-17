@@ -86,8 +86,7 @@ def fitness_wrapper(swarm_values, ensemble_arch, models, threshold, k_vals, trai
   val_acc = val_scores[0].item()
   val_loss = val_scores[3]
 
-  #fitness = (k1 * val_loss) + (k2/len(models) *  len(ensemble.models))
-  fitness = -((k1 * val_acc) + (k2 * 1/(len(ensemble.models))))
+  fitness = (k1 * val_loss) + (k2/len(models) *  len(ensemble.models))
 
   return fitness
 
@@ -122,29 +121,73 @@ def get_ensemble_output(output_vals, weights):
 
   sftmx = nn.Softmax(dim=1)
   ensemble_out = weights[0] * sftmx(output_vals[0])
-  print(ensemble_out)
 
   for i in range(1, len(output_vals)):
     ensemble_out += weights[i] * sftmx(output_vals[i])
-    print(ensemble_out)
 
   return ensemble_out
 
-def get_model_suite(swarm_values, models, threshold):
+def get_model_suite(swarm_values, model_outputs, threshold):
   model_suite = []
 
-  for i, model in enumerate(models):
+  for i, model in enumerate(model_outputs):
     
     if swarm_values[i] >= threshold:
       model_suite.append(model)
 
   return model_suite
 
-def fitness_wrapper_ensemble_out(model_suite, k_vals, device, classes, trainloader, valloader, weights=None):
+def topk_acc(output, targets, topk):
+  
+  maxk = max(topk)
+  _, y_pred = output.topk(k = maxk, dim=1)
+  y_pred = y_pred.t()
+  target_reshaped = targets.view(1, -1).expand_as(y_pred)
+  correct = (y_pred == target_reshaped)
+
+  list_topk_accs = [] 
+  for k in topk:
+    ind_which_topk_matched_truth = correct[:k]
+    flattened_indicator_which_topk_matched_truth = ind_which_topk_matched_truth.reshape(-1).float()
+    tot_correct_topk = flattened_indicator_which_topk_matched_truth.float().sum(dim=0, keepdim=True)
+    list_topk_accs.append(tot_correct_topk)
+
+  return list_topk_accs
+
+def _get_output_scores(logits, dataset, criterion, device, classes):
+  
+  data_loss = 0.0
+  class_correct = list(0 for i in range(len(classes)))
+  sum_top1 = 0
+  sum_top3 = 0
+  sum_top5 = 0 
+  targets = dataset.targets
+  targets = targets.to(device)
+  loss = criterion(logits, targets)
+  data_loss += loss.item()
+  top_k = topk_acc(logits, targets, (1,3,5))
+  top_1 = top_k[0][0] / len(dataset)
+  top_3 = top_k[1][0] / len(dataset)
+  top_5 = top_k[2][0] / len(dataset)
+  print('Loss: {:.4f}'.format(loss))
+  print('top_k acc: {:.4f}, {:.4f}, {:.4f}'.format(top_1, top_3, top_5))
+
+  return (top_1, top_3, top_5, loss)
+
+def fitness_wrapper_ensemble(train_output, val_output, num_models, k_vals, device, classes, trainset, vallset):
   
   k1, k2 = k_vals
   
   criterion = LabelSmoothingCrossEntropy()
+  
+  criterion = criterion.to(device)
+
+  train_scores = _get_output_scores(train_output, trainset, criterion, device, classes)
+  val_scores = _get_output_scores(val_output, vallset, criterion, device, classes)
+  val_acc = val_scores[0]
+
+  fitness = -((k1 * val_acc) + (k2 * 1/num_models))
+  return fitness 
 
 def get_vit_l_arch(n_classes):
   model = models.vit_l_16(weights = models.ViT_L_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
