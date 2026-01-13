@@ -237,4 +237,5 @@ def get_regnet_arch(n_classes):
 
   return model
 
-
+def load_output_from_dir():
+  pass
