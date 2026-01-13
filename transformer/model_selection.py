@@ -1,7 +1,8 @@
+import os
 import torch.optim as optim
 import torch.nn as nn
 
-from torch import cat
+from torch import cat, load, stack
 from torchvision import models
 from timm.loss import LabelSmoothingCrossEntropy
 from tqdm import tqdm
@@ -248,5 +249,14 @@ def load_output_from_dir(path, num_models):
   returns
   torch.Tensor:model_outputs
   """
-  
 
+  output_list = [] 
+  
+  for i in range(num_models):
+    model_path = os.path.join(path, f"model_{i+1}_val_logits.pt")
+    model_output = load(model_path)
+    output_list.append(model_output)
+
+  output_stack = stack(output_list, dim=1)
+  
+  return output_stack
