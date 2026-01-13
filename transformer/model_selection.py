@@ -237,5 +237,16 @@ def get_regnet_arch(n_classes):
 
   return model
 
-def load_output_from_dir():
-  pass
+def load_output_from_dir(path, num_models):
+  """
+  Loads validation output tensors for a group of models in a single folder and returns as a single tensor of stacked outputs
+  ---------------------------------------------------
+  parameters
+  string:path
+  int:num_models
+  --------------------------------------------------
+  returns
+  torch.Tensor:model_outputs
+  """
+  
+
