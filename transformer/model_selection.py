@@ -129,6 +129,17 @@ def get_ensemble_output(output_vals, weights):
   return ensemble_out
 
 def get_model_suite(swarm_values, model_outputs, threshold):
+  """
+  For the current swarm position, return the selected suite of models
+  ----------------------------------------------------------------------
+  parameters
+  iterable:swarm_values
+  torch.Tensor:model_outputs tensor with the shape (num_models, num_images, num_classes)
+  float:threshold model selection threshold between 0 and 1 
+  -----------------------------------------------------------------------
+  return 
+  list:model_suits tensor locations of selected model output
+  """
   model_suite = []
 
   for i, model in enumerate(model_outputs):
@@ -175,7 +186,7 @@ def _get_output_scores(logits, dataset, criterion, device, classes):
 
   return (top_1, top_3, top_5, loss)
 
-def fitness_wrapper_ensemble(train_output, val_output, num_models, k_vals, device, classes, trainset, vallset):
+def fitness_wrapper_ensemble(val_output, num_models, k_vals, device, classes, vallset):
   
   k1, k2 = k_vals
   
@@ -183,7 +194,6 @@ def fitness_wrapper_ensemble(train_output, val_output, num_models, k_vals, devic
   
   criterion = criterion.to(device)
 
-  train_scores = _get_output_scores(train_output, trainset, criterion, device, classes)
   val_scores = _get_output_scores(val_output, vallset, criterion, device, classes)
   val_acc = val_scores[0]
 
@@ -247,7 +257,7 @@ def load_output_from_dir(path, num_models):
   int:num_models
   --------------------------------------------------
   returns
-  torch.Tensor:model_outputs
+  torch.Tensor:model_outputs tensor with shape (num_models, num_images, num_classes)
   """
 
   output_list = [] 
@@ -257,6 +267,8 @@ def load_output_from_dir(path, num_models):
     model_output = load(model_path)
     output_list.append(model_output)
 
-  output_stack = stack(output_list, dim=1)
+  output_stack = stack(output_list, dim=0)
   
   return output_stack
+
+
