@@ -2,7 +2,7 @@ import os
 import torch.optim as optim
 import torch.nn as nn
 
-from torch import cat, load, stack
+from torch import cat, load, stack, tensor, int32
 from torchvision import models
 from timm.loss import LabelSmoothingCrossEntropy
 from tqdm import tqdm
@@ -174,6 +174,10 @@ def _get_output_scores(logits, dataset, criterion, device, classes):
   sum_top3 = 0
   sum_top5 = 0 
   targets = dataset.targets
+
+  if type(targets) == list:
+    targets = tensor(targets, dtype=int32)
+
   targets = targets.to(device)
   loss = criterion(logits, targets)
   data_loss += loss.item()
