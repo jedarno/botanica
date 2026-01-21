@@ -207,9 +207,6 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
     nn.Linear(512, len(classes))
   )
 
-  for param in model.encoder.layers.encoder_layer_10.parameters():
-    param.requires_grad = True
-
   for param in model.encoder.layers.encoder_layer_11.parameters():
     param.requires_grad = True
 
@@ -221,7 +218,7 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
 
   model = model.to(device)
 
-  tune_params = [{'params' : model.encoder.layers.encoder_layer_10.parameters()}, {'params' : model.encoder.layers.encoder_layer_11.parameters()}, {'params': model.encoder.ln.parameters()}, {'params':  model.heads.head.parameters()}]
+  tune_params = [{'params' : model.encoder.layers.encoder_layer_11.parameters()}, {'params': model.encoder.ln.parameters()}, {'params':  model.heads.head.parameters()}]
 
   criterion = LabelSmoothingCrossEntropy()
   criterion = criterion.to(device)
@@ -335,9 +332,6 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
     nn.Linear(512, len(classes))
    )
 
-  for param in model.features[6].parameters():
-    param.requires_grad = True
-
   for param in model.features[7].parameters():
     param.requires_grad = True
 
@@ -345,7 +339,6 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
     param.requires_grad = True
 
   tune_params = [
-    {'params':model.features[6].parameters()},
     {'params':model.features[7].parameters()},
     {'params':model.head.parameters()}
   ]
