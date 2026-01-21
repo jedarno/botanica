@@ -334,15 +334,29 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
     nn.Dropout(0.3),
     nn.Linear(512, len(classes))
    )
-  model = model.to(device)
 
+  for param in model.features[6].parameters():
+    param.requires_grad = True
+
+  for param in model.features[7].parameters():
+    param.requires_grad = True
+
+  for param in model.head.parameters():
+    param.requires_grad = True
+
+  tune_params = [
+    {'params':model.features[6].parameters()},
+    {'params':model.features[7].parameters()},
+    {'params':model.head.parameters()}
+  ]
+
+  model = model.to(device)
   criterion = LabelSmoothingCrossEntropy()
   criterion = criterion.to(device)
   optimizer = optim.AdamW(model.head.parameters(), lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
-  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
+  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
   model = get_train_model(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
-
 
   return model
 
