@@ -206,7 +206,22 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
     nn.Dropout(0.3),
     nn.Linear(512, len(classes))
   )
+
+  for param in model.encoder.layers.encoder_layer_10.parameters():
+    param.requires_grad = True
+
+  for param in model.encoder.layers.encoder_layer_11.parameters():
+    param.requires_grad = True
+
+  for param in model.encoder.ln.parameters():
+    param.requires_grad = True
+
+  for param in model.heads.head.parameters():
+    param.requires_grad = True
+
   model = model.to(device)
+
+  tune_params = [{'params' : model.encoder.layers.encoder_layer_10.parameters()}, {'params' : model.encoder.layers.encoder_layer_11.parameters()}, {'params': model.encoder.ln.parameters()}, {'params':  model.heads.head.parameters()}]
 
   criterion = LabelSmoothingCrossEntropy()
   criterion = criterion.to(device)
