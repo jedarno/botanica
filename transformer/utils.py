@@ -267,7 +267,7 @@ def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, va
   criterion = LabelSmoothingCrossEntropy()
   criterion = criterion.to(device)
   optimizer = optim.AdamW(tune_params, lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
-  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+  exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
   loss = train_model_loss(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
 
   return loss
