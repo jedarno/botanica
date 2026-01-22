@@ -123,7 +123,7 @@ def get_ensemble_output(output_vals, weights):
   sftmx = nn.Softmax(dim=1)
   ensemble_out = weights[0] * sftmx(output_vals[0])
 
-  for i in range(1, len(output_vals)):
+  for i in range(len(output_vals)):
     ensemble_out += weights[i] * sftmx(output_vals[i])
 
   return ensemble_out
