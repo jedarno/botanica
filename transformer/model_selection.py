@@ -140,14 +140,14 @@ def get_model_suite(swarm_values, model_outputs, threshold):
   return 
   list:model_suits tensor locations of selected model output
   """
-  model_suite = []
+  model_suite_index = []
 
   for i, model in enumerate(model_outputs):
     
     if swarm_values[i] >= threshold:
-      model_suite.append(model)
+      model_suite_index.append(i)
 
-  return model_suite
+  return model_suite_index
 
 def topk_acc(output, targets, topk):
   
