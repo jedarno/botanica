@@ -76,10 +76,11 @@ class transformer_ensemble_weighted(nn.Module):
         self.models = models
         self.sftmx = nn.Softmax(dim=1)
 
-        if weights:
-                self.weights = weights
-        else:
+        if weights is None:
           self.weights = np.array([1] * len(self.models))
+
+        else:
+          self.weights = weights
 
     @property
     def weights(self):
