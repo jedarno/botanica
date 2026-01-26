@@ -252,7 +252,7 @@ def get_regnet_arch(n_classes):
 
   return model
 
-def load_output_from_dir(path, num_models):
+def load_output_from_dir(path, num_models, mode = "val"):
   """
   Loads validation output tensors for a group of models in a single folder and returns as a single tensor of stacked outputs
   ---------------------------------------------------
@@ -267,7 +267,7 @@ def load_output_from_dir(path, num_models):
   output_list = [] 
   
   for i in range(num_models):
-    model_path = os.path.join(path, f"model_{i+1}_val_logits.pt")
+    model_path = os.path.join(path, f"model_{i+1}_{mode}_logits.pt")
     model_output = load(model_path)
     output_list.append(model_output)
 
