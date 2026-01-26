@@ -199,7 +199,7 @@ def fitness_wrapper_ensemble(val_output, num_models, k_vals, device, classes, va
   criterion = criterion.to(device)
 
   val_scores = _get_output_scores(val_output, vallset, criterion, device, classes)
-  val_acc = val_scores[0]
+  val_acc = val_scores[0].item()
 
   fitness = -((k1 * val_acc) + (k2 * 1/num_models))
   return fitness 
