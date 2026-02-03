@@ -207,27 +207,19 @@ def train_model_wrapper_vit_b(params, trainloader, trainset, valloader, valset, 
     nn.Linear(512, len(classes))
   )
 
-  for param in model.encoder.layers.encoder_layer_11.parameters():
-    param.requires_grad = True
-
-  for param in model.encoder.ln.parameters():
-    param.requires_grad = True
-
   for param in model.heads.head.parameters():
     param.requires_grad = True
 
   model = model.to(device)
 
-  tune_params = [{'params' : model.encoder.layers.encoder_layer_11.parameters()}, {'params': model.encoder.ln.parameters()}, {'params':  model.heads.head.parameters()}]
-
   criterion = LabelSmoothingCrossEntropy()
   criterion = criterion.to(device)
-  optimizer = optim.AdamW(tune_params, lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
+  optimizer = optim.AdamW(model.head.heads.params, lr=params[0], betas = (params[1], 0.999), weight_decay=params[2])
   exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
   model = get_train_model(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
 
-  return model
+  return loss
 
 def train_model_wrapper_regnety16gf(params, trainloader, trainset, valloader, valset, device, num_epochs, classes=None):
   """
@@ -351,7 +343,7 @@ def train_model_wrapper_swin_b(params, trainloader, trainset, valloader, valset,
 
   model = get_train_model(model, criterion, optimizer, exp_lr_scheduler, trainloader, trainset, valloader, valset, device, num_epochs=num_epochs)
 
-  return model
+  return loss
 
 
 def binary_support_set_prediction(anchor_embeddings, support_embeddings_cls1, support_embeddings_cls2):
