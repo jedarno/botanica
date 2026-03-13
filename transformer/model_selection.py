@@ -238,9 +238,9 @@ def get_vit_b_arch(n_classes):
     
   n_inputs = model.heads.head.in_features
   model.heads.head = nn.Sequential(
-    nn.Linear(n_inputs, 512)
-    nn.reLU()
-    nn.Dropout(0.3)
+    nn.Linear(n_inputs, 512),
+    nn.reLU(),
+    nn.Dropout(0.3),
     nn.Linear(512, n_classes)
     )
 
