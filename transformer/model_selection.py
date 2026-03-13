@@ -229,6 +229,23 @@ def get_vit_l_arch(n_classes):
 
   return model
 
+def get_vit_b_arch(n_classes):
+
+  model = models.vit_b_16(weights = models.ViT_B_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
+
+  for param in model.parameters():
+    param.requires_grad = False
+    
+  n_inputs = model.heads.head.in_features
+  model.heads.head = nn.Sequential(
+    nn.Linear(n_inputs, 512)
+    nn.reLU()
+    nn.Dropout(0.3)
+    nn.Linear(512, n_classes)
+    )
+
+  return model
+
 
 def get_regnet_arch(n_classes):
   model = models.regnet_y_16gf(weights = models.RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1)
