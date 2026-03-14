@@ -244,6 +244,14 @@ def get_vit_b_arch(n_classes):
     nn.Linear(512, n_classes)
     )
 
+  vit_b_1.fc = nn.Sequential(
+    nn.Linear(768, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, len(classes))
+   )
+
+
   return model
 
 
