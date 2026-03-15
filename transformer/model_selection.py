@@ -238,7 +238,7 @@ def get_swin_b_arch(n_classes):
     nn.Linear(n_inputs, 512),
     nn.ReLU(),
     nn.Dropout(0.3),
-    nn.Linear(512, len(classes))
+    nn.Linear(512, n_classes)
     )
 
   return model
