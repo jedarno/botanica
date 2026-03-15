@@ -244,12 +244,12 @@ def get_vit_b_arch(n_classes):
     nn.Linear(512, n_classes)
     )
 
-  model.fc = nn.Sequential(
-    nn.Linear(768, 512),
-    nn.ReLU(),
-    nn.Dropout(0.3),
-    nn.Linear(512, n_classes)
-   )
+#  model.fc = nn.sequential(
+#    nn.linear(768, 512),
+#    nn.relu(),
+#    nn.dropout(0.3),
+#    nn.linear(512, n_classes)
+#   )
 
 
   return model
