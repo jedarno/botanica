@@ -229,6 +229,20 @@ def get_vit_l_arch(n_classes):
 
   return model
 
+def get_swin_b_arch(n_classes):
+
+  model = models.swin_b(weights = models.Swin_B_Weights.IMAGENET1K_V1)
+  n_inputs = model.head.in_features
+
+  model.head = nn.Sequential(
+    nn.Linear(n_inputs, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, len(classes))
+    )
+
+  return model
+
 def get_vit_b_arch(n_classes):
 
   model = models.vit_b_16(weights = models.ViT_B_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
